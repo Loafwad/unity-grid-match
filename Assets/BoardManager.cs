@@ -21,6 +21,8 @@ public class BoardManager : MonoBehaviour
     {
         instance = GetComponent<BoardManager>();
 
+        LeanTween.init(2000);
+
         Vector3 offset = tile.GetComponent<MeshRenderer>().bounds.size;
         CreateBoard(offset.x, offset.z);
         //InvokeRepeating("FindNullTiles", 1.0f, 0.3f);
@@ -96,25 +98,45 @@ public class BoardManager : MonoBehaviour
                         continue;
                     }
                     GameObject childAbove = grid[upix, upiz].transform.GetChild(0).gameObject;
-                    Transform parentAbove = childAbove.transform.parent;
+                    Transform parentAbove = grid[upix, upiz].transform;
 
                     if (childAbove.GetComponent<MeshRenderer>().enabled == false && childAbove != null)
                     {
                         continue;
                     }
-                    LeanTween.move(childAbove, grid[x, z].transform.position, shiftSpeed).setEase(shitAnimCurve).setOnComplete(DoBoth);
 
-                    childAbove.transform.parent = thisParent;
                     grid[x, z].transform.GetChild(0).parent = parentAbove;
+                    childAbove.transform.parent = thisParent;
+
+                    /*
+                    LeanTween.move(childAbove, grid[x, z].transform.position, shiftSpeed).setEase(shitAnimCurve).setOnComplete(FindNullTilesClearMatches);
+                    */
+                    var seq = LeanTween.sequence();
+                    seq.append(LeanTween.move(childAbove, grid[x, z].transform.position, shiftSpeed).setEase(shitAnimCurve));
+                    FindNullTiles();
+                    //delays are adjustable but can't be too small
+                    seq.append(0.5f);
+                    seq.append(parentAbove.GetComponent<Tile>().ClearAllMatches);
+                    seq.append(0.1f);
+                    seq.append(FindNullTiles);
+
+                    //at the time of the ccall
+                    //the parent above is likely not the parent above the grid element
+
+                    //LeanTween.move
+                    //ClearMatches
+                    //removes tiles
+                    //FindNullTiles
+                    //LeanTween.move
                 }
             }
         }
     }
 
-    void DoBoth()
+    void FindNullTilesClearMatches()
     {
-        ClearMatchesFinalPass();
         FindNullTiles();
+        ClearMatchesFinalPass();
     }
 
     void ClearMatchesFinalPass()
