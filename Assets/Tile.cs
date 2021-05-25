@@ -153,7 +153,7 @@ public class Tile : MonoBehaviour
             for (int j = 0; j < board.matchingTiles.Count; j++)
             {
                 Debug.Log("Removed " + board.matchingTiles.Count + " tiles");
-                color = "";
+                color = "null";
                 board.matchingTiles[j].transform.GetChild(0).GetComponent<MeshRenderer>().enabled = false;
             }
         }

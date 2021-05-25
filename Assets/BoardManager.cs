@@ -22,6 +22,10 @@ public class BoardManager : MonoBehaviour
 
     [SerializeField] float TileShuffleDelay = 0.5f;
     [SerializeField] float TileClearDelay = 0.5f;
+
+    [Header("Debug Tools")]
+
+    [SerializeField] private bool enableClearSkip = false;
     void Start()
     {
         instance = GetComponent<BoardManager>();
@@ -38,11 +42,11 @@ public class BoardManager : MonoBehaviour
         toggle = !toggle;
         if (toggle)
         {
-            shiftDirection = new Vector2(1, 0);
+            shiftDirection = new Vector2(0, 1);
         }
         else
         {
-            shiftDirection = new Vector2(-1, 0);
+            shiftDirection = new Vector2(0, -1);
         }
     }
 
@@ -66,6 +70,14 @@ public class BoardManager : MonoBehaviour
         {
             for (int z = 0; z < zSize; z++)
             {
+                if (enableClearSkip)
+                {
+                    if (x % 2 == 0 && z % 2 != 0 || x % 2 != 0 && z % 2 == 0)
+                    {
+                        Debug.Log("odd number found");
+                        continue;
+                    }
+                }
                 GameObject newTile = Instantiate(tile, new Vector3(startX + (xOffset * x), 0, startZ + (zOffset * z)), tile.transform.rotation);
                 newTile.name = "x = " + x + " || " + " z = " + z;
                 grid[x, z] = newTile;
@@ -117,38 +129,41 @@ public class BoardManager : MonoBehaviour
 
                     grid[x, z].transform.GetChild(0).parent = parentAbove;
                     childAbove.transform.parent = thisParent;
+                    Tile tile = parentAbove.GetComponent<Tile>();
 
-                    /*
-                    LeanTween.move(childAbove, grid[x, z].transform.position, shiftSpeed).setEase(shitAnimCurve).setOnComplete(FindNullTilesClearMatches);
-                    */
-
-                    seq.append(TileShuffleDelay);
-                    seq.append(() => { parentAbove.GetComponent<Tile>().isShifting = true; });
-                    seq.append(() => tempListOfTiles.Add(parentAbove));
-                    seq.append(LeanTween.move(childAbove, grid[x, z].transform.position, shiftSpeed).setEase(shitAnimCurve).setOnComplete(() => parentAbove.GetComponent<Tile>().isShifting = false));
-                    FindNullTiles();
-                    seq.append(TileClearDelay);
-                    seq.append(isShiftingCheck);
-
-
+                    if (parentAbove != null)
+                    {
+                        //error: object reference not set to instance of object
+                        //note: LTseq.addOn;
+                        seq.append(TileShuffleDelay);
+                        seq.append(() => { tile.isShifting = true; });
+                        seq.append(() => { tempListOfTiles.Add(tile.transform); });
+                        seq.append(LeanTween.move(childAbove, grid[x, z].transform.position, shiftSpeed).setEase(shitAnimCurve).setOnComplete(() => tile.isShifting = false));
+                        FindNullTiles();
+                        seq.append(TileClearDelay);
+                        seq.append(() => ClearTilesIfIdle(seq));
+                    }
                     //seq.append(parentAbove.GetComponent<Tile>().ClearAllMatches); //this works
                 }
             }
         }
-        void isShiftingCheck()
-        {
-            foreach (Transform item in tempListOfTiles)
-                if (item.gameObject.GetComponent<Tile>().isShifting == false)
-                {
-                    Debug.LogWarning("Clearing Matches!!");
-                    seq.append(ClearMatchesFinalPass);
-                    seq.append(TileShuffleDelay);
-                    seq.append(FindNullTiles);
-                    tempListOfTiles.Clear();
-                }
-        }
     }
 
+    private void ClearTilesIfIdle(LTSeq seq)
+    {
+        for (int i = 0; i < tempListOfTiles.Count; i++)
+        {
+            if (tempListOfTiles[i].gameObject.GetComponent<Tile>().isShifting == false)
+            {
+                //ToggleShiftDirection();
+                Debug.LogWarning("Clearing Matches!!");
+                seq.append(ClearMatchesFinalPass);
+                seq.append(TileShuffleDelay);
+                seq.append(FindNullTiles);
+                tempListOfTiles.Clear();
+            }
+        }
+    }
 
 
     void FindNullTilesClearMatches()
@@ -164,8 +179,12 @@ public class BoardManager : MonoBehaviour
             for (int z = 0; z < zSize; z++)
             {
                 //current position minus the direction I want to shift?
-                var ix = x - (int)shiftDirection.x;
-                var iz = z - (int)shiftDirection.y;
+                //var ix = x - (int)shiftDirection.x;
+                //var iz = z - (int)shiftDirection.y;
+
+                var ix = x;
+                var iz = z;
+
 
                 //skip every other tile in a digonal pattern across the board
                 if (x % 2 == 0 && z % 2 != 0 || x % 2 != 0 && z % 2 == 0)

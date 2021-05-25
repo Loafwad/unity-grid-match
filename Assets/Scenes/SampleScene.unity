@@ -267,6 +267,7 @@ MonoBehaviour:
   matchingTiles: []
   TileShuffleDelay: 0.05
   TileClearDelay: 0.32
+  enableClearSkip: 1
   isShifting: 0
   tempListOfTiles: []
 --- !u!4 &685199452
