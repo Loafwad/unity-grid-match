@@ -230,7 +230,7 @@ MonoBehaviour:
   xSize: 12
   zSize: 12
   shiftDirection: {x: 0, y: 1}
-  shiftSpeed: 0.5
+  shiftSpeed: 0.3
   shitAnimCurve:
     serializedVersion: 2
     m_Curve:
@@ -244,6 +244,15 @@ MonoBehaviour:
       inWeight: 0
       outWeight: 0
     - serializedVersion: 3
+      time: 0.4710925
+      value: 0.4545887
+      inSlope: 4.3924103
+      outSlope: 4.3924103
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0.06308924
+      outWeight: 0.061321758
+    - serializedVersion: 3
       time: 1
       value: 1
       inSlope: 0
@@ -256,7 +265,10 @@ MonoBehaviour:
     m_PostInfinity: 2
     m_RotationOrder: 4
   matchingTiles: []
+  TileShuffleDelay: 0.05
+  TileClearDelay: 0.32
   isShifting: 0
+  tempListOfTiles: []
 --- !u!4 &685199452
 Transform:
   m_ObjectHideFlags: 0
@@ -445,13 +457,13 @@ Transform:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 963194225}
-  m_LocalRotation: {x: 0.24099627, y: -0, z: -0, w: 0.97052604}
-  m_LocalPosition: {x: 4.31, y: 10.29, z: -7.85}
+  m_LocalRotation: {x: 0.3139669, y: -0, z: -0, w: 0.949434}
+  m_LocalPosition: {x: 10.81, y: 12.23, z: -6.73}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children: []
   m_Father: {fileID: 0}
   m_RootOrder: 0
-  m_LocalEulerAnglesHint: {x: 27.891, y: 0, z: 0}
+  m_LocalEulerAnglesHint: {x: 36.597, y: 0, z: 0}
 --- !u!1001 &2376181264742247350
 PrefabInstance:
   m_ObjectHideFlags: 0

@@ -23,6 +23,7 @@ public class Tile : MonoBehaviour
     [Header("Position Info")]
     [SerializeField] public Vector2 objectGridPosition;
     [SerializeField] private Vector3 objectPosition;
+    [SerializeField] public bool isShifting;
 
     [SerializeField]
     private List<GameObject> adjacentTiles;
@@ -105,7 +106,7 @@ public class Tile : MonoBehaviour
     }
 
 
-    private List<GameObject> GetAllAdjacentTiles(Vector2 position)
+    public List<GameObject> GetAllAdjacentTiles(Vector2 position)
     {
         adjacentTiles = new List<GameObject>();
         adjacentTiles.Clear();
@@ -152,6 +153,7 @@ public class Tile : MonoBehaviour
             for (int j = 0; j < board.matchingTiles.Count; j++)
             {
                 Debug.Log("Removed " + board.matchingTiles.Count + " tiles");
+                color = "";
                 board.matchingTiles[j].transform.GetChild(0).GetComponent<MeshRenderer>().enabled = false;
             }
         }

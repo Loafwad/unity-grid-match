@@ -17,11 +17,16 @@ public class BoardManager : MonoBehaviour
 
     public List<GameObject> matchingTiles;
     private bool toggle = false;
+
+    [Header("Delay Adjustment")]
+
+    [SerializeField] float TileShuffleDelay = 0.5f;
+    [SerializeField] float TileClearDelay = 0.5f;
     void Start()
     {
         instance = GetComponent<BoardManager>();
 
-        LeanTween.init(2000);
+        LeanTween.init(5000);
 
         Vector3 offset = tile.GetComponent<MeshRenderer>().bounds.size;
         CreateBoard(offset.x, offset.z);
@@ -79,8 +84,13 @@ public class BoardManager : MonoBehaviour
         }
     }
     [SerializeField] public bool isShifting;
+
+    [SerializeField] List<Transform> tempListOfTiles = new List<Transform>();
+
     public void FindNullTiles()
     {
+        LTSeq seq = LeanTween.sequence();
+
         for (int x = 0; x < xSize; x++)
         {
             for (int z = 0; z < zSize; z++)
@@ -111,27 +121,35 @@ public class BoardManager : MonoBehaviour
                     /*
                     LeanTween.move(childAbove, grid[x, z].transform.position, shiftSpeed).setEase(shitAnimCurve).setOnComplete(FindNullTilesClearMatches);
                     */
-                    var seq = LeanTween.sequence();
-                    seq.append(LeanTween.move(childAbove, grid[x, z].transform.position, shiftSpeed).setEase(shitAnimCurve));
+
+                    seq.append(TileShuffleDelay);
+                    seq.append(() => { parentAbove.GetComponent<Tile>().isShifting = true; });
+                    seq.append(() => tempListOfTiles.Add(parentAbove));
+                    seq.append(LeanTween.move(childAbove, grid[x, z].transform.position, shiftSpeed).setEase(shitAnimCurve).setOnComplete(() => parentAbove.GetComponent<Tile>().isShifting = false));
                     FindNullTiles();
-                    //delays are adjustable but can't be too small
-                    seq.append(0.5f);
-                    seq.append(parentAbove.GetComponent<Tile>().ClearAllMatches);
-                    seq.append(0.1f);
-                    seq.append(FindNullTiles);
+                    seq.append(TileClearDelay);
+                    seq.append(isShiftingCheck);
 
-                    //at the time of the ccall
-                    //the parent above is likely not the parent above the grid element
 
-                    //LeanTween.move
-                    //ClearMatches
-                    //removes tiles
-                    //FindNullTiles
-                    //LeanTween.move
+                    //seq.append(parentAbove.GetComponent<Tile>().ClearAllMatches); //this works
                 }
             }
         }
+        void isShiftingCheck()
+        {
+            foreach (Transform item in tempListOfTiles)
+                if (item.gameObject.GetComponent<Tile>().isShifting == false)
+                {
+                    Debug.LogWarning("Clearing Matches!!");
+                    seq.append(ClearMatchesFinalPass);
+                    seq.append(TileShuffleDelay);
+                    seq.append(FindNullTiles);
+                    tempListOfTiles.Clear();
+                }
+        }
     }
+
+
 
     void FindNullTilesClearMatches()
     {
@@ -145,17 +163,32 @@ public class BoardManager : MonoBehaviour
         {
             for (int z = 0; z < zSize; z++)
             {
-                var downix = x - (int)shiftDirection.x;
-                var downiz = z - (int)shiftDirection.y;
+                //current position minus the direction I want to shift?
+                var ix = x - (int)shiftDirection.x;
+                var iz = z - (int)shiftDirection.y;
 
-                if (downiz < 0 || downix < 0 || downix >= xSize || downiz >= zSize)
+                //skip every other tile in a digonal pattern across the board
+                if (x % 2 == 0 && z % 2 != 0 || x % 2 != 0 && z % 2 == 0)
                 {
-                    Debug.Log("FindNullTiles(); tried to go outside bounds");
+                    Debug.Log("odd number found");
                     continue;
                 }
-                GameObject childBelow = grid[downix, downiz].transform.GetChild(0).gameObject;
+                //if i the tile has a neighbour of the same color you can skip
+                //List<GameObject> adjacentTiles = new List<GameObject>();
+                //var tempPos = new Vector2(grid[ix, iz].transform.position.x, grid[ix, iz].transform.position.z);
+
+                //adjacentTiles = grid[ix, iz].GetComponent<Tile>().GetAllAdjacentTiles(tempPos);
+
+
+                if (iz < 0 || ix < 0 || ix >= xSize || iz >= zSize)
+                {
+                    Debug.Log("ClearMatchesFinalPass(); tried to go outside bounds");
+                    continue;
+                }
+                GameObject childBelow = grid[ix, iz].transform.GetChild(0).gameObject;
                 if (childBelow.GetComponent<MeshRenderer>().enabled == true)
                 {
+                    Debug.LogWarning("called FinalPass Clear");
                     childBelow.transform.parent.GetComponent<Tile>().ClearAllMatches();
                 }
             }
