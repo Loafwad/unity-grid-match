@@ -17,6 +17,9 @@ public class BoardManager : MonoBehaviour
 
     public List<GameObject> matchingTiles;
     private bool toggle = false;
+    [Header("Board Appearance")]
+    [SerializeField] private Vector2 offset = new Vector2(0.1f, 0.1f);
+    [SerializeField] private bool inheritPrefabOffset = false;
 
     [Header("Delay Adjustment")]
 
@@ -32,8 +35,15 @@ public class BoardManager : MonoBehaviour
 
         LeanTween.init(5000);
 
-        Vector3 offset = tile.GetComponent<MeshRenderer>().bounds.size;
-        CreateBoard(offset.x, offset.z);
+        MeshRenderer prefabTileMesh = tile.GetComponent<MeshRenderer>();
+        Vector2 prefabOffset = new Vector2(prefabTileMesh.bounds.size.x, prefabTileMesh.bounds.size.z);
+        Vector2 addativeOffset;
+        if (inheritPrefabOffset)
+            addativeOffset = prefabOffset;
+        else
+            addativeOffset = offset * prefabOffset;
+
+        CreateBoard(addativeOffset.x, addativeOffset.y);
         //InvokeRepeating("FindNullTiles", 1.0f, 0.3f);
     }
 
@@ -57,6 +67,7 @@ public class BoardManager : MonoBehaviour
             FindNullTiles();
         }
     }
+
     private void CreateBoard(float xOffset, float zOffset)
     {
         grid = new GameObject[xSize, zSize];
@@ -78,11 +89,11 @@ public class BoardManager : MonoBehaviour
                         continue;
                     }
                 }
-                GameObject newTile = Instantiate(tile, new Vector3(startX + (xOffset * x), 0, startZ + (zOffset * z)), tile.transform.rotation);
-                newTile.name = "x = " + x + " || " + " z = " + z;
-                grid[x, z] = newTile;
-                newTile.transform.parent = transform;
-                newTile.GetComponent<Tile>().objectGridPosition = new Vector2(x, z);
+                GameObject gridTile = Instantiate(tile, new Vector3(startX + (xOffset * x), 0, startZ + (zOffset * z)), tile.transform.rotation);
+                gridTile.name = "x = " + x + " || " + " z = " + z;
+                grid[x, z] = gridTile;
+                gridTile.transform.parent = this.transform;
+                gridTile.GetComponent<Tile>().objectGridPosition = new Vector2(x, z);
 
                 List<GameObject> possibleCharacters = new List<GameObject>();
                 possibleCharacters.AddRange(characters);
@@ -91,7 +102,7 @@ public class BoardManager : MonoBehaviour
                 possibleCharacters.Remove(previousBelow);
 
                 GameObject allowedTile = characters[Random.Range(0, possibleCharacters.Count)];
-                newTile.transform.GetChild(0).GetComponent<MeshRenderer>().sharedMaterial = allowedTile.GetComponent<MeshRenderer>().sharedMaterial;
+                gridTile.transform.GetChild(0).GetComponent<MeshRenderer>().sharedMaterial = allowedTile.GetComponent<MeshRenderer>().sharedMaterial;
             }
         }
     }
@@ -116,13 +127,15 @@ public class BoardManager : MonoBehaviour
 
                     if (upiz < 0 || upix < 0 || upix >= xSize || upiz >= zSize)
                     {
-                        Debug.Log("FindNullTiles(); tried to go outside bounds");
+                        Debug.Log("x: " + x + " z: " + z + " tried to go outside bounds");
                         continue;
                     }
+
                     GameObject childAbove = grid[upix, upiz].transform.GetChild(0).gameObject;
                     Transform parentAbove = grid[upix, upiz].transform;
+                    GameObject thisChild = grid[x, z].transform.GetChild(0).gameObject;
 
-                    if (childAbove.GetComponent<MeshRenderer>().enabled == false && childAbove != null)
+                    if (childAbove.GetComponent<MeshRenderer>().enabled != true && parentAbove != null)
                     {
                         continue;
                     }
@@ -131,19 +144,20 @@ public class BoardManager : MonoBehaviour
                     childAbove.transform.parent = thisParent;
                     Tile tile = parentAbove.GetComponent<Tile>();
 
-                    if (parentAbove != null)
+                    //error: object reference not set to instance of object
+                    //note: LTseq.addOn;
+                    if (!tempListOfTiles.Contains(tile.transform))
                     {
-                        //error: object reference not set to instance of object
-                        //note: LTseq.addOn;
-                        seq.append(TileShuffleDelay);
-                        seq.append(() => { tile.isShifting = true; });
-                        seq.append(() => { tempListOfTiles.Add(tile.transform); });
-                        seq.append(LeanTween.move(childAbove, grid[x, z].transform.position, shiftSpeed).setEase(shitAnimCurve).setOnComplete(() => tile.isShifting = false));
-                        FindNullTiles();
-                        seq.append(TileClearDelay);
-                        seq.append(() => ClearTilesIfIdle(seq));
+                        seq.append(() => tile.isShifting = true);
+                        seq.append(() => tile.triedToMove = true);
+                        seq.append(() => tempListOfTiles.Add(tile.transform));
                     }
-                    //seq.append(parentAbove.GetComponent<Tile>().ClearAllMatches); //this works
+                    seq.append(TileShuffleDelay);
+                    //Debug.Log("tweens runnings" + LeanTween.tweensRunning);
+                    seq.append(LeanTween.move(childAbove, grid[x, z].transform.position, shiftSpeed).setEase(shitAnimCurve).setOnComplete(() => tile.isShifting = false));
+                    FindNullTiles();
+                    seq.append(TileClearDelay);
+                    seq.append(() => ClearTilesIfIdle(seq));
                 }
             }
         }
@@ -156,11 +170,15 @@ public class BoardManager : MonoBehaviour
             if (tempListOfTiles[i].gameObject.GetComponent<Tile>().isShifting == false)
             {
                 //ToggleShiftDirection();
-                Debug.LogWarning("Clearing Matches!!");
+                Debug.LogWarning("Clearing Tiles");
                 seq.append(ClearMatchesFinalPass);
+                tempListOfTiles.Clear();
                 seq.append(TileShuffleDelay);
                 seq.append(FindNullTiles);
-                tempListOfTiles.Clear();
+            }
+            else
+            {
+                Debug.LogWarning("Tiles are still shifting, be patient");
             }
         }
     }
@@ -185,19 +203,12 @@ public class BoardManager : MonoBehaviour
                 var ix = x;
                 var iz = z;
 
-
                 //skip every other tile in a digonal pattern across the board
                 if (x % 2 == 0 && z % 2 != 0 || x % 2 != 0 && z % 2 == 0)
                 {
-                    Debug.Log("odd number found");
+                    Debug.Log("Skipping odd numbered tiles");
                     continue;
                 }
-                //if i the tile has a neighbour of the same color you can skip
-                //List<GameObject> adjacentTiles = new List<GameObject>();
-                //var tempPos = new Vector2(grid[ix, iz].transform.position.x, grid[ix, iz].transform.position.z);
-
-                //adjacentTiles = grid[ix, iz].GetComponent<Tile>().GetAllAdjacentTiles(tempPos);
-
 
                 if (iz < 0 || ix < 0 || ix >= xSize || iz >= zSize)
                 {

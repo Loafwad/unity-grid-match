@@ -24,6 +24,7 @@ public class Tile : MonoBehaviour
     [SerializeField] public Vector2 objectGridPosition;
     [SerializeField] private Vector3 objectPosition;
     [SerializeField] public bool isShifting;
+    [SerializeField] public bool triedToMove;
 
     [SerializeField]
     private List<GameObject> adjacentTiles;
@@ -118,9 +119,12 @@ public class Tile : MonoBehaviour
                 {
                     continue;
                 }
-                Debug.Log("index is " + x + "-" + z);
-                int ix = (int)position.x + x;
-                int iz = (int)position.y + z;
+                //Debug.Log("index is " + x + "-" + z);
+                //int ix = (int)position.x + x;
+                //int iz = (int)position.y + z;
+
+                int ix = (int)objectGridPosition.x + x;
+                int iz = (int)objectGridPosition.y + z;
                 if (iz < 0 || ix < 0 || ix >= board.xSize || iz >= board.zSize)
                 {
                     continue;
@@ -144,8 +148,10 @@ public class Tile : MonoBehaviour
     {
         board.matchingTiles.Clear();
         Vector3 i;
-        i.x = Mathf.Round(transform.position.x / 2);
-        i.z = Mathf.Round(transform.position.z / 2);
+        //i.x = Mathf.Round(transform.position.x / 2);
+        i.x = objectGridPosition.x;
+        i.z = objectGridPosition.y;
+        //i.z = Mathf.Round(transform.position.z / 2);
         FloodFill((int)i.x, (int)i.z);
         //Instantiate(red, new Vector3(i.x * 2, 0, i.z * 2), Quaternion.identity);
         if (board.matchingTiles.Count >= 3)
