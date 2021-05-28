@@ -113,6 +113,7 @@ public class BoardManager : MonoBehaviour
     public void FindNullTiles()
     {
         LTSeq seq = LeanTween.sequence();
+        //this function is fucked & moves tiles above the current tile -/- NOT THIS TILE
 
         for (int x = 0; x < xSize; x++)
         {
@@ -137,6 +138,13 @@ public class BoardManager : MonoBehaviour
 
                     if (childAbove.GetComponent<MeshRenderer>().enabled != true && parentAbove != null)
                     {
+                        //skips iteration on tile if
+                        // - child above does not have a color
+                        // - parent above is not empty
+                        continue;
+                    }
+                    if (thisChild.GetComponent<MeshRenderer>().enabled == true && thisChild.transform.parent == null)
+                    {
                         continue;
                     }
 
@@ -153,9 +161,10 @@ public class BoardManager : MonoBehaviour
                         seq.append(() => tempListOfTiles.Add(tile.transform));
                     }
                     seq.append(TileShuffleDelay);
-                    //Debug.Log("tweens runnings" + LeanTween.tweensRunning);
-                    seq.append(LeanTween.move(childAbove, grid[x, z].transform.position, shiftSpeed).setEase(shitAnimCurve).setOnComplete(() => tile.isShifting = false));
-                    FindNullTiles();
+                    Debug.Log("tweens runnings" + LeanTween.tweensRunning);
+
+                    //seq.append(LeanTween.move(childAbove, grid[x, z].transform.position, shiftSpeed).setEase(shitAnimCurve).setOnComplete(() => tile.isShifting = false));
+                    //FindNullTiles();
                     seq.append(TileClearDelay);
                     seq.append(() => ClearTilesIfIdle(seq));
                 }
