@@ -110,6 +110,21 @@ public class BoardManager : MonoBehaviour
 
     [SerializeField] List<Transform> tempListOfTiles = new List<Transform>();
 
+    private List<Tile> FindNullTilesInColumn(int column)
+    {
+        List<Tile> listOfNullTiles = new List<Tile>();
+
+        for (int z = 0; z < zSize; z++)
+        {
+            Tile currentGridTile = grid[column, z].GetComponent<Tile>();
+            if (currentGridTile.platform == null)
+            {
+                listOfNullTiles.Add(currentGridTile);
+            }
+        }
+        Debug.Log("Found: " + listOfNullTiles + "null tiles on the board");
+        return listOfNullTiles;
+    }
 
     public void FindNullTiles()
     {
