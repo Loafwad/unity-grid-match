@@ -10,6 +10,7 @@ public class Tile : MonoBehaviour
     private bool isSelected = false;
     public string color;
     BoardManager board = BoardManager.instance;
+    private GridAnimations anim;
     [SerializeField] public GameObject platform;
 
     [Header("Switch Tile Animation")]
@@ -33,8 +34,8 @@ public class Tile : MonoBehaviour
     void Awake()
     {
         render = platform.GetComponent<MeshRenderer>();
+        anim = GameObject.Find("BoardAnimator").GetComponent<GridAnimations>();
     }
-
     void Start()
     {
         objectPosition = new Vector3(transform.position.x, 0, transform.position.z);
@@ -185,20 +186,12 @@ public class Tile : MonoBehaviour
     {
         if (selected)
         {
-            LeanTween.moveY(platform, 1, animSwitchDuration).setEase(animSwitchCurve);
-            LeanTween.rotate(platform, new Vector3(90, 0, 0), rotationTime).setEase(animRotateCurve);
+            anim.TileSelection(platform);
         }
         else
         {
-            //if (platform.transform.position.y != 0)
-            LeanTween.moveY(platform, platform.transform.position.y - 1, animSwitchDuration).setEase(animSwitchCurve).setOnComplete(ResetPosition);
-            LeanTween.rotate(platform, new Vector3(-90, 0, 0), rotationTime).setEase(animRotateCurve);
-
+            anim.TileDeselection(platform);
         }
-    }
-    public void ResetPosition()
-    {
-        platform.transform.position = transform.position;
     }
 
 }

@@ -122,7 +122,7 @@ public class BoardManager : MonoBehaviour
                 listOfNullTiles.Add(currentGridTile);
             }
         }
-        Debug.Log("Found: " + listOfNullTiles + "null tiles on the board");
+        Debug.Log("Found: " + listOfNullTiles.Count + "null tiles on the board");
         return listOfNullTiles;
     }
 
@@ -146,7 +146,6 @@ public class BoardManager : MonoBehaviour
 
         for (int x = 0; x < xSize; x++)
         {
-            FindNullTilesInColumn(x);
             LowestNullTileInList(x, FindNullTilesInColumn(x));
 
             for (int z = 0; z < zSize; z++)
