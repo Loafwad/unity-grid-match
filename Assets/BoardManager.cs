@@ -117,7 +117,7 @@ public class BoardManager : MonoBehaviour
         for (int z = 0; z < zSize; z++)
         {
             Tile currentGridTile = grid[column, z].GetComponent<Tile>();
-            if (currentGridTile.platform == null)
+            if (currentGridTile.platform.GetComponent<MeshRenderer>().enabled == false)
             {
                 listOfNullTiles.Add(currentGridTile);
             }
@@ -126,12 +126,29 @@ public class BoardManager : MonoBehaviour
         return listOfNullTiles;
     }
 
+    private int LowestNullTileInList(int column, List<Tile> listOfTiles)
+    {
+        int lowest = xSize;
+        foreach (Tile tile in listOfTiles)
+        {
+            if ((int)tile.objectGridPosition.y <= lowest)
+            {
+                lowest = (int)tile.objectGridPosition.y;
+            }
+        }
+        Debug.Log("Found lowest null tile at: " + lowest);
+        return lowest;
+    }
+
     public void FindNullTiles()
     {
         LTSeq seq = LeanTween.sequence();
 
         for (int x = 0; x < xSize; x++)
         {
+            FindNullTilesInColumn(x);
+            LowestNullTileInList(x, FindNullTilesInColumn(x));
+
             for (int z = 0; z < zSize; z++)
             {
                 Transform thisParent = grid[x, z].transform;
