@@ -10,7 +10,7 @@ public class Tile : MonoBehaviour
     private bool isSelected = false;
     public string color;
     BoardManager board = BoardManager.instance;
-    [SerializeField] GameObject platform;
+    [SerializeField] public GameObject platform;
 
     [Header("Switch Tile Animation")]
     public AnimationCurve animSwitchCurve;

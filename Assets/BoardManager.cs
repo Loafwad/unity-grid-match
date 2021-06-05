@@ -110,10 +110,30 @@ public class BoardManager : MonoBehaviour
 
     [SerializeField] List<Transform> tempListOfTiles = new List<Transform>();
 
+    private List<Tile> FindNullTilesInColumn(int column)
+    {
+        List<Tile> listOfNullTiles = new List<Tile>();
+
+        for (int z = 0; z < zSize; z++)
+        {
+            Tile currentGridTile = grid[column, z].GetComponent<Tile>();
+            if (currentGridTile.platform == null)
+            {
+                listOfNullTiles.Add(currentGridTile);
+            }
+        }
+        Debug.Log("Found: " + listOfNullTiles + "null tiles on the board");
+        return listOfNullTiles;
+    }
+
+    private int LowestNullTileInColumn(int column)
+    {
+        return 0;
+    }
+
     public void FindNullTiles()
     {
         LTSeq seq = LeanTween.sequence();
-        //this function is fucked & moves tiles above the current tile -/- NOT THIS TILE
 
         for (int x = 0; x < xSize; x++)
         {
@@ -157,7 +177,7 @@ public class BoardManager : MonoBehaviour
                     if (!tempListOfTiles.Contains(tile.transform))
                     {
                         seq.append(() => tile.isShifting = true);
-                        seq.append(() => tile.triedToMove = true);
+                        seq.append(() => tile.triedToMove = true); //for debug
                         seq.append(() => tempListOfTiles.Add(tile.transform));
                     }
                     seq.append(TileShuffleDelay);
