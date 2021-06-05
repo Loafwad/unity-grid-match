@@ -167,7 +167,6 @@ public class BoardManager : MonoBehaviour
                     FindNullTiles();
                     seq.append(TileClearDelay);
                     seq.append(() => ClearTilesIfIdle(seq));
-                    //hello TESTING TESTING
                 }
             }
         }
