@@ -163,6 +163,7 @@ public class BoardManager : MonoBehaviour
                     seq.append(TileShuffleDelay);
                     Debug.Log("tweens runnings" + LeanTween.tweensRunning);
 
+                    //Terrible solution with terrible performance.
                     LeanTween.move(childAbove, grid[x, z].transform.position, shiftSpeed).setEase(shitAnimCurve).setOnComplete(() => tile.isShifting = false);
                     FindNullTiles();
                     seq.append(TileClearDelay);
