@@ -59,14 +59,6 @@ public class BoardManager : MonoBehaviour
         }
     }
 
-    void Update()
-    {
-        if (Input.GetKeyDown(KeyCode.F))
-        {
-            FindNullTiles();
-        }
-    }
-
     private void CreateBoard(float xOffset, float zOffset)
     {
         grid = new GameObject[xSize, zSize];
@@ -140,7 +132,7 @@ public class BoardManager : MonoBehaviour
 
     int lowestNullTile;
 
-    public void CreateGroup(int column, List<GameObject> platformChain)
+    public GameObject CreateGroup(int column, List<GameObject> platformChain)
     {
         GameObject columnObject = new GameObject();
         columnObject.transform.parent = this.transform;
@@ -150,6 +142,7 @@ public class BoardManager : MonoBehaviour
         {
             platform.transform.parent = columnObject.transform.parent;
         }
+        return columnObject;
     }
 
     private List<GameObject> FindChain(int column)
@@ -171,10 +164,15 @@ public class BoardManager : MonoBehaviour
     {
         for (int x = 0; x < xSize; x++)
         {
-            CreateGroup(x, FindChain(x));
+            List<GameObject> currentChain = FindChain(x);
+
+            int lowestChainPos = LowestYPosInlist(x, currentChain);
+            GameObject currentColumn = CreateGroup(x, currentChain);
             for (int z = 0; z < zSize; z++)
             {
+
             }
+            LeanTween.move(currentColumn, grid[x, 0].transform.position, shiftSpeed).setEase(shitAnimCurve);
         }
     }
     /* 
