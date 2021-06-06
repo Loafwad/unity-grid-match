@@ -44,7 +44,6 @@ public class BoardManager : MonoBehaviour
             addativeOffset = offset * prefabOffset;
 
         CreateBoard(addativeOffset.x, addativeOffset.y);
-        //InvokeRepeating("FindNullTiles", 1.0f, 0.3f);
     }
 
     public void ToggleShiftDirection()
@@ -237,10 +236,6 @@ public class BoardManager : MonoBehaviour
         {
             for (int z = 0; z < zSize; z++)
             {
-                //current position minus the direction I want to shift?
-                //var ix = x - (int)shiftDirection.x;
-                //var iz = z - (int)shiftDirection.y;
-
                 var ix = x;
                 var iz = z;
 

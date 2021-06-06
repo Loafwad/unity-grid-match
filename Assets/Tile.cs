@@ -120,9 +120,6 @@ public class Tile : MonoBehaviour
                 {
                     continue;
                 }
-                //Debug.Log("index is " + x + "-" + z);
-                //int ix = (int)position.x + x;
-                //int iz = (int)position.y + z;
 
                 int ix = (int)objectGridPosition.x + x;
                 int iz = (int)objectGridPosition.y + z;
@@ -144,17 +141,13 @@ public class Tile : MonoBehaviour
         return adjacentTiles;
     }
 
-    //world position is always twice the grid position (dont know why lol)
     public void ClearAllMatches()
     {
         board.matchingTiles.Clear();
         Vector3 i;
-        //i.x = Mathf.Round(transform.position.x / 2);
         i.x = objectGridPosition.x;
         i.z = objectGridPosition.y;
-        //i.z = Mathf.Round(transform.position.z / 2);
         FloodFill((int)i.x, (int)i.z);
-        //Instantiate(red, new Vector3(i.x * 2, 0, i.z * 2), Quaternion.identity);
         if (board.matchingTiles.Count >= 3)
         {
             for (int j = 0; j < board.matchingTiles.Count; j++)
