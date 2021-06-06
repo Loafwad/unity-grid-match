@@ -515,14 +515,32 @@ MonoBehaviour:
     serializedVersion: 2
     m_Curve:
     - serializedVersion: 3
-      time: 0
+      time: -0.0019760132
       value: 0
-      inSlope: 0
-      outSlope: 0
+      inSlope: -0.56021774
+      outSlope: -0.56021774
       tangentMode: 0
       weightedMode: 0
       inWeight: 0
-      outWeight: 0
+      outWeight: 0.2828664
+    - serializedVersion: 3
+      time: 0.34214288
+      value: 0.028939493
+      inSlope: 0.94086194
+      outSlope: 0.94086194
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0.33333334
+      outWeight: 0.49259356
+    - serializedVersion: 3
+      time: 0.50813067
+      value: 0.69050866
+      inSlope: 3.121616
+      outSlope: 3.121616
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0.33333334
+      outWeight: 0.08526613
     - serializedVersion: 3
       time: 1
       value: 1
@@ -559,8 +577,8 @@ MonoBehaviour:
     m_PreInfinity: 2
     m_PostInfinity: 2
     m_RotationOrder: 4
-  selectRotTime: 0.5
-  selectDurationTime: 0.3
+  selectRotTime: 0.3
+  selectDurationTime: 0.2
   deselectCurve:
     serializedVersion: 2
     m_Curve:
@@ -598,6 +616,15 @@ MonoBehaviour:
       inWeight: 0
       outWeight: 0
     - serializedVersion: 3
+      time: 0.5800349
+      value: 0.835182
+      inSlope: 2.1990216
+      outSlope: 2.1990216
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0.33333334
+      outWeight: 0.10773427
+    - serializedVersion: 3
       time: 1
       value: 1
       inSlope: 0
@@ -610,7 +637,7 @@ MonoBehaviour:
     m_PostInfinity: 2
     m_RotationOrder: 4
   deselectRotTime: 0.5
-  deselectTime: 0.3
+  deselectTime: 0.2
 --- !u!1001 &2376181264742247350
 PrefabInstance:
   m_ObjectHideFlags: 0

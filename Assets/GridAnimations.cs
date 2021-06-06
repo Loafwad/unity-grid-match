@@ -27,6 +27,6 @@ public class GridAnimations : MonoBehaviour
     public void TileDeselection(GameObject platform)
     {
         LeanTween.moveY(platform, platform.transform.position.y - 1, deselectTime).setEase(deselectCurve).setOnComplete(() => platform.transform.position = platform.transform.parent.transform.position);
-        LeanTween.rotate(platform, new Vector3(-90, 0, 0), selectRotTime).setEase(deselectRotCurve);
+        LeanTween.rotate(platform, new Vector3(-90, 0, 0), deselectRotTime).setEase(deselectRotCurve);
     }
 }

@@ -29,6 +29,7 @@ public class Tile : MonoBehaviour
 
     [SerializeField]
     private List<GameObject> adjacentTiles;
+    public Vector2 testGridPos;
 
     #region Awake/Start/Update
     void Awake()
@@ -38,12 +39,10 @@ public class Tile : MonoBehaviour
     }
     void Start()
     {
+        (int x, int z) test = board.GridTileFromWorldPos(this.transform.position);
+        testGridPos = new Vector2(test.x, test.z);
         objectPosition = new Vector3(transform.position.x, 0, transform.position.z);
-        color = this.transform.GetChild(0).GetComponent<MeshRenderer>().sharedMaterial.name;
-    }
-    void Update()
-    {
-        platform = gameObject.transform.GetChild(0).gameObject;
+        color = platform.GetComponent<MeshRenderer>().sharedMaterial.name;
     }
     #endregion
     private void Select()
@@ -102,11 +101,6 @@ public class Tile : MonoBehaviour
             }
         }
     }
-    public GameObject ObjecAtPosition(int x, int z)
-    {
-        return board.grid[x, z].gameObject;
-    }
-
 
     public List<GameObject> GetAllAdjacentTiles(Vector2 position)
     {
