@@ -109,10 +109,9 @@ public class BoardManager : MonoBehaviour
 
     [SerializeField] List<Transform> tempListOfTiles = new List<Transform>();
 
-    private List<Tile> FindNullTilesInColumn(int column)
+    private List<Tile> FindEmptyGridTiles(int column)
     {
         List<Tile> listOfNullTiles = new List<Tile>();
-
         for (int z = 0; z < zSize; z++)
         {
             Tile currentGridTile = grid[column, z].GetComponent<Tile>();
@@ -121,88 +120,128 @@ public class BoardManager : MonoBehaviour
                 listOfNullTiles.Add(currentGridTile);
             }
         }
-        Debug.Log("Found: " + listOfNullTiles.Count + "null tiles on the board");
+        Debug.Log("Found: " + listOfNullTiles.Count + "null tiles in column: " + column);
         return listOfNullTiles;
     }
 
-    private int LowestNullTileInList(int column, List<Tile> listOfTiles)
+    private int LowestYPosInlist(int column, List<GameObject> listOfTiles)
     {
         int lowest = xSize;
-        foreach (Tile tile in listOfTiles)
+        foreach (GameObject tile in listOfTiles)
         {
-            if ((int)tile.objectGridPosition.y <= lowest)
+            if ((int)tile.transform.position.y <= lowest)
             {
-                lowest = (int)tile.objectGridPosition.y;
+                lowest = (int)tile.transform.position.y;
             }
         }
-        Debug.Log("Found lowest null tile at: " + lowest);
+        Debug.Log("Found lowest tile at: " + lowest);
         return lowest;
     }
 
-    public void FindNullTiles()
+    int lowestNullTile;
+
+    public void CreateGroup(int column, List<GameObject> platformChain)
     {
-        LTSeq seq = LeanTween.sequence();
+        GameObject columnObject = new GameObject();
+        columnObject.transform.parent = this.transform;
+        columnObject.transform.position = new Vector2(column, LowestYPosInlist(column, platformChain));
 
-        for (int x = 0; x < xSize; x++)
+        foreach (GameObject platform in platformChain)
         {
-            LowestNullTileInList(x, FindNullTilesInColumn(x));
-
-            for (int z = 0; z < zSize; z++)
-            {
-                Transform thisParent = grid[x, z].transform;
-                if (grid[x, z].transform.GetChild(0).GetComponent<MeshRenderer>().enabled == false)
-                {
-                    //current position + shift direction
-                    var upix = x + (int)shiftDirection.x;
-                    var upiz = z + (int)shiftDirection.y;
-
-                    if (upiz < 0 || upix < 0 || upix >= xSize || upiz >= zSize)
-                    {
-                        Debug.Log("x: " + x + " z: " + z + " tried to go outside bounds");
-                        continue;
-                    }
-
-                    GameObject childAbove = grid[upix, upiz].transform.GetChild(0).gameObject;
-                    Transform parentAbove = grid[upix, upiz].transform;
-                    GameObject thisChild = grid[x, z].transform.GetChild(0).gameObject;
-
-                    if (childAbove.GetComponent<MeshRenderer>().enabled != true && parentAbove != null)
-                    {
-                        //skips iteration on tile if
-                        // - child above does not have a color
-                        // - parent above is not empty
-                        continue;
-                    }
-                    if (thisChild.GetComponent<MeshRenderer>().enabled == true && thisChild.transform.parent == null)
-                    {
-                        continue;
-                    }
-
-                    grid[x, z].transform.GetChild(0).parent = parentAbove;
-                    childAbove.transform.parent = thisParent;
-                    Tile tile = parentAbove.GetComponent<Tile>();
-
-                    //error: object reference not set to instance of object
-                    //note: LTseq.addOn;
-                    if (!tempListOfTiles.Contains(tile.transform))
-                    {
-                        seq.append(() => tile.isShifting = true);
-                        seq.append(() => tile.triedToMove = true); //for debug
-                        seq.append(() => tempListOfTiles.Add(tile.transform));
-                    }
-                    seq.append(TileShuffleDelay);
-                    Debug.Log("tweens runnings" + LeanTween.tweensRunning);
-
-                    //Terrible solution with terrible performance.
-                    LeanTween.move(childAbove, grid[x, z].transform.position, shiftSpeed).setEase(shitAnimCurve).setOnComplete(() => tile.isShifting = false);
-                    FindNullTiles();
-                    seq.append(TileClearDelay);
-                    seq.append(() => ClearTilesIfIdle(seq));
-                }
-            }
+            platform.transform.parent = columnObject.transform.parent;
         }
     }
 
+    private List<GameObject> FindChain(int column)
+    {
+        List<GameObject> platformChain = new List<GameObject>();
+        for (int z = 0; z < zSize; z++)
+        {
+            GameObject _platform = grid[column, z].GetComponent<Tile>().platform;
+            if (_platform.GetComponent<MeshRenderer>().enabled == true)
+            {
+                platformChain.Add(_platform);
+            }
+        }
+        return platformChain;
+    }
+
+    //called after initial local match
+    public void ShiftBoard()
+    {
+        for (int x = 0; x < xSize; x++)
+        {
+            CreateGroup(x, FindChain(x));
+            for (int z = 0; z < zSize; z++)
+            {
+            }
+        }
+    }
+    /* 
+        public void FindNullTiles()
+        {
+            LTSeq seq = LeanTween.sequence();
+
+            for (int x = 0; x < xSize; x++)
+            {
+                lowestNullTile = LowestNullTileInList(x, FindNullTilesInColumn(x));
+
+                for (int z = 0; z < zSize; z++)
+                {
+                    Transform thisParent = grid[x, z].transform;
+                    if (grid[x, z].transform.GetChild(0).GetComponent<MeshRenderer>().enabled == false)
+                    {
+                        //current position + shift direction
+                        var upix = x + (int)shiftDirection.x;
+                        var upiz = z + (int)shiftDirection.y;
+
+                        if (upiz < 0 || upix < 0 || upix >= xSize || upiz >= zSize)
+                        {
+                            Debug.Log("x: " + x + " z: " + z + " tried to go outside bounds");
+                            continue;
+                        }
+
+                        GameObject childAbove = grid[upix, upiz].transform.GetChild(0).gameObject;
+                        Transform parentAbove = grid[upix, upiz].transform;
+                        GameObject thisChild = grid[x, z].transform.GetChild(0).gameObject;
+
+                        if (childAbove.GetComponent<MeshRenderer>().enabled != true && parentAbove != null)
+                        {
+                            //skips iteration on tile if
+                            // - child above does not have a color
+                            // - parent above is not empty
+                            continue;
+                        }
+                        if (thisChild.GetComponent<MeshRenderer>().enabled == true && thisChild.transform.parent == null)
+                        {
+                            continue;
+                        }
+
+                        grid[x, z].transform.GetChild(0).parent = parentAbove;
+                        childAbove.transform.parent = thisParent;
+                        Tile tile = parentAbove.GetComponent<Tile>();
+
+                        //error: object reference not set to instance of object
+                        //note: LTseq.addOn;
+                        if (!tempListOfTiles.Contains(tile.transform))
+                        {
+                            seq.append(() => tile.isShifting = true);
+                            seq.append(() => tile.triedToMove = true); //for debug
+                            seq.append(() => tempListOfTiles.Add(tile.transform));
+                        }
+                        seq.append(TileShuffleDelay);
+                        Debug.Log("tweens runnings" + LeanTween.tweensRunning);
+
+                        //Terrible solution with terrible performance.
+                        //LeanTween.move(childAbove, grid[x, z].transform.position, shiftSpeed).setEase(shitAnimCurve).setOnComplete(() => tile.isShifting = false);
+                        FindNullTiles();
+                        seq.append(TileClearDelay);
+                        seq.append(() => ClearTilesIfIdle(seq));
+                    }
+                }
+            }
+        }
+    */
     private void ClearTilesIfIdle(LTSeq seq)
     {
         for (int i = 0; i < tempListOfTiles.Count; i++)
@@ -211,52 +250,13 @@ public class BoardManager : MonoBehaviour
             {
                 //ToggleShiftDirection();
                 Debug.LogWarning("Clearing Tiles");
-                seq.append(ClearMatchesFinalPass);
                 tempListOfTiles.Clear();
                 seq.append(TileShuffleDelay);
-                seq.append(FindNullTiles);
+                //seq.append(FindNullTiles);
             }
             else
             {
                 Debug.LogWarning("Tiles are still shifting, be patient");
-            }
-        }
-    }
-
-
-    void FindNullTilesClearMatches()
-    {
-        FindNullTiles();
-        ClearMatchesFinalPass();
-    }
-
-    void ClearMatchesFinalPass()
-    {
-        for (int x = 0; x < xSize; x++)
-        {
-            for (int z = 0; z < zSize; z++)
-            {
-                var ix = x;
-                var iz = z;
-
-                //skip every other tile in a digonal pattern across the board
-                if (x % 2 == 0 && z % 2 != 0 || x % 2 != 0 && z % 2 == 0)
-                {
-                    Debug.Log("Skipping odd numbered tiles");
-                    continue;
-                }
-
-                if (iz < 0 || ix < 0 || ix >= xSize || iz >= zSize)
-                {
-                    Debug.Log("ClearMatchesFinalPass(); tried to go outside bounds");
-                    continue;
-                }
-                GameObject childBelow = grid[ix, iz].transform.GetChild(0).gameObject;
-                if (childBelow.GetComponent<MeshRenderer>().enabled == true)
-                {
-                    Debug.LogWarning("called FinalPass Clear");
-                    childBelow.transform.parent.GetComponent<Tile>().ClearAllMatches();
-                }
             }
         }
     }

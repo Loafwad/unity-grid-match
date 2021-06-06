@@ -164,7 +164,6 @@ public class Tile : MonoBehaviour
         previousSelected.ClearAllMatches();
         previousSelected.Deselect();
         ClearAllMatches();
-        board.FindNullTiles();
     }
 
     public void SwitchPosition()
