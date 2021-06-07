@@ -30,7 +30,7 @@ public class BoardManager : MonoBehaviour
 
     [SerializeField] private bool enableClearSkip = false;
     Vector3 addativeOffset;
-    void Start()
+    private void Start()
     {
         instance = GetComponent<BoardManager>();
 
@@ -46,7 +46,7 @@ public class BoardManager : MonoBehaviour
         CreateBoard(addativeOffset.x, addativeOffset.y);
     }
 
-    void Update()
+    private void Update()
     {
         if (Input.GetKeyDown(KeyCode.F))
         {
@@ -109,24 +109,23 @@ public class BoardManager : MonoBehaviour
 
     [SerializeField] List<Transform> tempListOfTiles = new List<Transform>();
 
-    private List<Tile> FindEmptyGridTiles(int column)
+    private List<GameObject> FindEmptyGridTiles(int column)
     {
-        List<Tile> listOfNullTiles = new List<Tile>();
-        for (int z = 0; z < zSize; z++)
+        List<GameObject> listOfNullTiles = new List<GameObject>();
+        for (int z = zSize - 1; z >= 0; z--)
         {
-            Tile currentGridTile = grid[column, z].GetComponent<Tile>();
-            if (currentGridTile.platform.GetComponent<MeshRenderer>().enabled == false)
+            if (grid[column, z].GetComponent<Tile>().platform.GetComponent<MeshRenderer>().enabled == false)
             {
-                listOfNullTiles.Add(currentGridTile);
+                listOfNullTiles.Add(grid[column, z]);
             }
         }
-        Debug.Log("Found: " + listOfNullTiles.Count + "null tiles in column: " + column);
+        Debug.Log("Found: " + listOfNullTiles.Count + " null tiles in column: " + column);
         return listOfNullTiles;
     }
 
     private int LowestGridPos(int column, List<GameObject> list)
     {
-        int lowest = xSize;
+        int lowest = xSize - 1;
         foreach (GameObject tile in list)
         {
             if (GridTileFromWorldPos(tile.transform.position).z <= lowest)
@@ -137,6 +136,10 @@ public class BoardManager : MonoBehaviour
             {
                 return lowest;
             }
+        }
+        if (list.Count == 0)
+        {
+            return 0;
         }
         Debug.Log("Found lowest tile at: " + lowest);
         return lowest;
@@ -152,11 +155,12 @@ public class BoardManager : MonoBehaviour
 
     int lowestNullTile;
 
-    public GameObject CreateGroup(int column, List<GameObject> chain)
+    private GameObject CreateGroup(int column, List<GameObject> chain)
     {
         GameObject columnObject = new GameObject();
         columnObject.transform.parent = this.transform;
         columnObject.transform.position = grid[column, LowestGridPos(column, chain)].transform.position;
+        columnObject.transform.name = "ColumnObject: " + column;
 
         foreach (GameObject platform in chain)
         {
@@ -165,28 +169,31 @@ public class BoardManager : MonoBehaviour
         return columnObject;
     }
 
-    public void DestroyGroup(GameObject group)
+    private void DestroyGroup(GameObject group)
     {
-        group.transform.DetachChildren();
+        //group.transform.DetachChildren();
         //Destroy(group);
     }
 
     private List<GameObject> FindChain(int column)
     {
-        List<GameObject> _platformChain = new List<GameObject>();
-        for (int z = 0; z < zSize; z++)
+        List<GameObject> chain = new List<GameObject>();
+        for (int z = zSize - 1; z >= 0; z--)
         {
-            if (grid[column, z].GetComponent<Tile>().platform.GetComponent<MeshRenderer>().enabled == true)
+            MeshRenderer platformMesh = grid[column, z].GetComponent<Tile>().platform.GetComponent<MeshRenderer>();
+
+            if (platformMesh.enabled == true)
             {
-                _platformChain.Add(grid[column, z].GetComponent<Tile>().platform);
+                chain.Add(grid[column, z].GetComponent<Tile>().platform);
             }
             else
             {
-                return _platformChain;
+                Debug.Log("Found: " + chain.Count + " in current chain: " + column);
+                return chain;
             }
         }
-        Debug.Log("Found: " + _platformChain.Count + " in current chain: " + column);
-        return _platformChain;
+        Debug.Log("Found: " + chain.Count + " in current chain: " + column);
+        return chain;
     }
 
     //called after initial local match
@@ -195,16 +202,20 @@ public class BoardManager : MonoBehaviour
         LTSeq seq = LeanTween.sequence();
         for (int x = 0; x < xSize; x++)
         {
+            List<GameObject> nullTileList = FindEmptyGridTiles(x);
+
             List<GameObject> currentChain = FindChain(x);
 
             int lowestChainPos = LowestGridPos(x, currentChain);
+            int lowestNullPos = LowestGridPos(x, nullTileList);
+
             GameObject currentColumn = CreateGroup(x, currentChain);
 
             for (int z = 0; z < zSize; z++)
             {
 
             }
-            seq.append(LeanTween.move(currentColumn, grid[x, lowestChainPos].transform.position, shiftSpeed).setEase(shitAnimCurve).setOnComplete(() => DestroyGroup(currentColumn)));
+            seq.append(LeanTween.move(currentColumn, grid[x, lowestNullPos].transform.position, shiftSpeed).setEase(shitAnimCurve).setOnComplete(() => DestroyGroup(currentColumn)));
         }
     }
     /* 

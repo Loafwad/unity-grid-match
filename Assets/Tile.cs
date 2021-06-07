@@ -147,7 +147,6 @@ public class Tile : MonoBehaviour
             for (int j = 0; j < board.matchingTiles.Count; j++)
             {
                 Debug.Log("Removed " + board.matchingTiles.Count + " tiles");
-                color = "null";
                 board.matchingTiles[j].transform.GetChild(0).GetComponent<MeshRenderer>().enabled = false;
             }
         }
@@ -166,6 +165,12 @@ public class Tile : MonoBehaviour
         LeanTween.move(previousSelected.platform, gameObject.transform.position, animSwitchDuration).setEase(animSwitchCurve);
         platform.transform.parent = previousSelected.transform;
         previousSelected.platform.transform.parent = this.transform;
+
+        GameObject tempThisPlatform = this.platform;
+        this.platform = previousSelected.platform;
+        previousSelected.platform = tempThisPlatform;
+
+
     }
 
     public void Hover(bool selected)
