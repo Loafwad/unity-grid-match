@@ -52,6 +52,19 @@ public class BoardManager : MonoBehaviour
         {
             ShiftBoard();
         }
+        if (Input.GetKeyDown(KeyCode.R))
+        {
+            for (int x = 0; x < xSize; x++)
+            {
+                for (int z = 0; z < zSize; z++)
+                {
+                    if (Random.value < 0.1f)
+                    {
+                        grid[x, z].GetComponent<Tile>().platform.GetComponent<MeshRenderer>().enabled = false;
+                    }
+                }
+            }
+        }
     }
     public void ToggleShiftDirection()
     {
@@ -109,7 +122,7 @@ public class BoardManager : MonoBehaviour
 
     [SerializeField] List<Transform> tempListOfTiles = new List<Transform>();
 
-    private List<GameObject> FindEmptyGridTiles(int column)
+    private List<GameObject> FindAllEmptyGridTiles(int column)
     {
         List<GameObject> listOfNullTiles = new List<GameObject>();
         for (int z = zSize - 1; z >= 0; z--)
@@ -141,7 +154,7 @@ public class BoardManager : MonoBehaviour
         {
             return 0;
         }
-        Debug.Log("Found lowest tile at: " + lowest);
+        //Debug.Log("Found lowest tile at: " + lowest);
         return lowest;
     }
 
@@ -162,38 +175,76 @@ public class BoardManager : MonoBehaviour
         columnObject.transform.position = grid[column, LowestGridPos(column, chain)].transform.position;
         columnObject.transform.name = "ColumnObject: " + column;
 
+        //Debug.Log("amount in chain: " + column + " : " + chain.Count);
         foreach (GameObject platform in chain)
         {
             platform.transform.parent = columnObject.transform;
         }
+        //Debug.Log("amount of children under colum: " + column + " : " + columnObject.transform.childCount);
         return columnObject;
     }
 
     private void DestroyGroup(GameObject group)
     {
-        //group.transform.DetachChildren();
-        //Destroy(group);
+        group.transform.DetachChildren();
+        Destroy(group);
     }
 
+    private void UpdateParents()
+    {
+        for (int x = 0; x < xSize; x++)
+        {
+            for (int z = 0; z < zSize; z++)
+            {
+                GameObject tempPlatform = grid[x, z].GetComponent<Tile>().platform;
+
+                int _z = GridTileFromWorldPos(grid[x, z].GetComponent<Tile>().platform.transform.position).z;
+                int _x = GridTileFromWorldPos(grid[x, z].GetComponent<Tile>().platform.transform.position).x;
+
+                grid[x, z].GetComponent<Tile>().platform = grid[_x, _z].GetComponent<Tile>().platform;
+                grid[_x, _z].GetComponent<Tile>().platform = tempPlatform;
+            }
+        }
+    }
     private List<GameObject> FindChain(int column)
     {
-        List<GameObject> chain = new List<GameObject>();
-        for (int z = zSize - 1; z >= 0; z--)
+        List<GameObject> _chain = new List<GameObject>();
+        bool _firstTile = new bool();
+        for (int z = xSize - 1; z >= 0; z--)
         {
             MeshRenderer platformMesh = grid[column, z].GetComponent<Tile>().platform.GetComponent<MeshRenderer>();
 
             if (platformMesh.enabled == true)
             {
-                chain.Add(grid[column, z].GetComponent<Tile>().platform);
+                _firstTile = true;
+                _chain.Add(grid[column, z].GetComponent<Tile>().platform);
             }
-            else
+            else if (_firstTile)
             {
-                Debug.Log("Found: " + chain.Count + " in current chain: " + column);
-                return chain;
+                Debug.Log("Found: " + _chain.Count + " in current chain: " + column);
+                return _chain;
+            }
+            else { continue; }
+
+        }
+        Debug.Log("Found: " + _chain.Count + " in current chain: " + column);
+        return _chain;
+    }
+
+    private int NextTilePos(int column, int currentPos)
+    {
+        for (int z = currentPos - 1; z >= 0; z--)
+        {
+            if (grid[column, z].GetComponent<Tile>().platform.GetComponent<MeshRenderer>().enabled == false)
+            {
+                continue;
+            }
+            else if (z + 1 <= currentPos)
+            {
+                return z + 1;
             }
         }
-        Debug.Log("Found: " + chain.Count + " in current chain: " + column);
-        return chain;
+        return 0;
     }
 
     //called after initial local match
@@ -202,22 +253,42 @@ public class BoardManager : MonoBehaviour
         LTSeq seq = LeanTween.sequence();
         for (int x = 0; x < xSize; x++)
         {
-            List<GameObject> nullTileList = FindEmptyGridTiles(x);
 
-            List<GameObject> currentChain = FindChain(x);
-
-            int lowestChainPos = LowestGridPos(x, currentChain);
-            int lowestNullPos = LowestGridPos(x, nullTileList);
-
-            GameObject currentColumn = CreateGroup(x, currentChain);
+            AnimateColumn(x);
 
             for (int z = 0; z < zSize; z++)
             {
 
             }
-            seq.append(LeanTween.move(currentColumn, grid[x, lowestNullPos].transform.position, shiftSpeed).setEase(shitAnimCurve).setOnComplete(() => DestroyGroup(currentColumn)));
         }
     }
+
+    void AnimateColumn(int x)
+    {
+        List<GameObject> currentChain = FindChain(x);
+        GameObject currentColumn = CreateGroup(x, currentChain);
+        int lowestChainPos = LowestGridPos(x, currentChain);
+        int nextTilePos = NextTilePos(x, lowestChainPos);
+
+        LeanTween.move(currentColumn, grid[x, nextTilePos].transform.position, shiftSpeed).setEase(shitAnimCurve).setOnComplete(() =>
+                    {
+                        UpdateParents();
+
+                        //currentColumn.transform.DetachChildren();
+                        currentChain = FindChain(x);
+                        currentColumn = CreateGroup(x, currentChain);
+
+                        if (nextTilePos > 0)
+                        {
+                            Debug.Log("Column: " + x + " has a grid pos of: " + GridTileFromWorldPos(currentColumn.transform.position).z);
+                            //AnimateColumn(x);
+
+                        }
+                    });
+    }
+
+
+
     /* 
         public void FindNullTiles()
         {
