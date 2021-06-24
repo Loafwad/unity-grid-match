@@ -27,9 +27,15 @@ public class Tile : MonoBehaviour
     [SerializeField] public bool isShifting;
     [SerializeField] public bool triedToMove;
 
+    [Header("State info")]
+    public bool platformMesh;
+
+
     [SerializeField]
     private List<GameObject> adjacentTiles;
     public Vector2 testGridPos;
+
+
 
     #region Awake/Start/Update
     void Awake()
@@ -43,6 +49,12 @@ public class Tile : MonoBehaviour
         testGridPos = new Vector2(test.x, test.z);
         objectPosition = new Vector3(transform.position.x, 0, transform.position.z);
         color = platform.GetComponent<MeshRenderer>().sharedMaterial.name;
+    }
+
+    void Update()
+    {
+        platformMesh = this.platform.GetComponent<MeshRenderer>().enabled;
+        color = this.platform.GetComponent<MeshRenderer>().sharedMaterial.name;
     }
     #endregion
     private void Select()

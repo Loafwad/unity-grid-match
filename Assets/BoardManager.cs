@@ -149,6 +149,7 @@ public class BoardManager : MonoBehaviour
             if (GridTileFromWorldPos(tile.transform.position).z <= lowest)
             {
                 lowest = GridTileFromWorldPos(tile.transform.position).z;
+                continue;
             }
             else
             {
@@ -159,7 +160,7 @@ public class BoardManager : MonoBehaviour
         {
             return 0;
         }
-        //Debug.Log("Found lowest tile at: " + lowest);
+        Debug.Log("Found lowest tile at: " + lowest + "in column: " + column);
         return lowest;
     }
 
@@ -173,44 +174,36 @@ public class BoardManager : MonoBehaviour
 
     int lowestNullTile;
 
-    private GameObject CreateGroup(int column, List<GameObject> chain)
+    private GameObject CreateGroup(List<GameObject> chain, int x, int z)
     {
         GameObject columnObject = new GameObject();
         columnObject.transform.parent = this.transform;
-        columnObject.transform.position = grid[column, LowestGridPos(column, chain)].transform.position;
-        columnObject.transform.name = "ColumnObject: " + column;
+        columnObject.transform.position = grid[x, z].transform.position;
+        columnObject.transform.name = "ColumnObject: " + x;
 
-        //Debug.Log("amount in chain: " + column + " : " + chain.Count);
-        //This seems to be the issue
-        //note: could introduce object pooling (which hast to happen eventually anyway) but unsure if this will solve the issue
         foreach (GameObject platform in chain)
         {
-            //platform.transform.parent = columnObject.transform;
             platform.transform.SetParent(columnObject.transform, true);
         }
-        //Debug.Log("amount of children under colum: " + column + " : " + columnObject.transform.childCount);
         return columnObject;
     }
 
     private void DestroyGroup(GameObject group)
     {
-        group.transform.DetachChildren();
-        Destroy(group);
+        //group.transform.DetachChildren();
+        //Destroy(group);
     }
 
-    private void UpdatePlatformReference()
+    public void UpdatePlatformReference()
     {
         for (int x = 0; x < xSize; x++)
         {
             for (int z = 0; z < zSize; z++)
             {
-                GameObject tempPlatform = grid[x, z].GetComponent<Tile>().platform;
-
                 int _z = GridTileFromWorldPos(grid[x, z].GetComponent<Tile>().platform.transform.position).z;
                 int _x = GridTileFromWorldPos(grid[x, z].GetComponent<Tile>().platform.transform.position).x;
 
-                grid[x, z].GetComponent<Tile>().platform = grid[_x, _z].GetComponent<Tile>().platform;
-                grid[_x, _z].GetComponent<Tile>().platform = tempPlatform;
+                grid[_x, _z].GetComponent<Tile>().platform = grid[x, z].GetComponent<Tile>().platform;
             }
         }
     }
@@ -220,9 +213,9 @@ public class BoardManager : MonoBehaviour
         bool _firstTile = new bool();
         for (int z = zSize - 1; z >= 0; z--)
         {
-            MeshRenderer platformMesh = grid[column, z].GetComponent<Tile>().platform.GetComponent<MeshRenderer>();
+            Tile tile = grid[column, z].GetComponent<Tile>();
 
-            if (platformMesh.enabled == true)
+            if (tile.platformMesh == true)
             {
                 _firstTile = true;
                 _chain.Add(grid[column, z].GetComponent<Tile>().platform);
@@ -230,20 +223,22 @@ public class BoardManager : MonoBehaviour
             else if (_firstTile)
             {
                 Debug.Log("Found: " + _chain.Count + " in current chain: " + column);
+                _firstTile = false;
                 return _chain;
             }
             else { continue; }
 
         }
-        Debug.Log("Found: " + _chain.Count + " in current chain: " + column);
+        //Debug.Log("Found: " + _chain.Count + " in current chain: " + column);
         return _chain;
     }
 
     private int NextTilePos(int column, int currentPos)
     {
-        for (int z = currentPos - 1; z >= 0; z--)
+        for (int z = currentPos; z >= 0; z--)
         {
-            if (grid[column, z].GetComponent<Tile>().platform.GetComponent<MeshRenderer>().enabled == false)
+            bool platformMesh = grid[column, z].GetComponent<Tile>().platformMesh;
+            if (platformMesh == false)
             {
                 continue;
             }
@@ -267,16 +262,17 @@ public class BoardManager : MonoBehaviour
 
     void AnimateColumn(int x)
     {
+        UpdatePlatformReference();
         List<GameObject> currentChain = FindChain(x);
-        GameObject currentColumn = CreateGroup(x, currentChain);
         int lowestChainPos = LowestGridPos(x, currentChain);
+        GameObject currentColumn = CreateGroup(currentChain, x, lowestChainPos);
         int nextTilePos = NextTilePos(x, lowestChainPos);
 
         LeanTween.move(currentColumn, grid[x, nextTilePos].transform.position, shiftSpeed).setEase(shitAnimCurve).setOnComplete(() =>
                     {
-                        UpdatePlatformReference();
 
-                        currentChain = FindChain(x);
+                        //currentChain = FindChain(x);
+                        UpdatePlatformReference();
                         DestroyGroup(currentColumn);
                         //currentColumn = CreateGroup(x, currentChain);
 
