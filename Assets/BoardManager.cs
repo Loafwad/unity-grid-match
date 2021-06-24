@@ -54,18 +54,24 @@ public class BoardManager : MonoBehaviour
         }
         if (Input.GetKeyDown(KeyCode.R))
         {
-            for (int x = 0; x < xSize; x++)
+            RemoveRandomTiles();
+        }
+    }
+
+    public void RemoveRandomTiles()
+    {
+        for (int x = 0; x < xSize; x++)
+        {
+            for (int z = 0; z < zSize; z++)
             {
-                for (int z = 0; z < zSize; z++)
+                if (Random.value < 0.1f)
                 {
-                    if (Random.value < 0.1f)
-                    {
-                        grid[x, z].GetComponent<Tile>().platform.GetComponent<MeshRenderer>().enabled = false;
-                    }
+                    grid[x, z].GetComponent<Tile>().platform.GetComponent<MeshRenderer>().enabled = false;
                 }
             }
         }
     }
+
     public void ToggleShiftDirection()
     {
         toggle = !toggle;
@@ -97,7 +103,6 @@ public class BoardManager : MonoBehaviour
                 {
                     if (x % 2 == 0 && z % 2 != 0 || x % 2 != 0 && z % 2 == 0)
                     {
-                        Debug.Log("odd number found");
                         continue;
                     }
                 }
@@ -176,9 +181,12 @@ public class BoardManager : MonoBehaviour
         columnObject.transform.name = "ColumnObject: " + column;
 
         //Debug.Log("amount in chain: " + column + " : " + chain.Count);
+        //This seems to be the issue
+        //note: could introduce object pooling (which hast to happen eventually anyway) but unsure if this will solve the issue
         foreach (GameObject platform in chain)
         {
-            platform.transform.parent = columnObject.transform;
+            //platform.transform.parent = columnObject.transform;
+            platform.transform.SetParent(columnObject.transform, true);
         }
         //Debug.Log("amount of children under colum: " + column + " : " + columnObject.transform.childCount);
         return columnObject;
@@ -190,7 +198,7 @@ public class BoardManager : MonoBehaviour
         Destroy(group);
     }
 
-    private void UpdateParents()
+    private void UpdatePlatformReference()
     {
         for (int x = 0; x < xSize; x++)
         {
@@ -210,7 +218,7 @@ public class BoardManager : MonoBehaviour
     {
         List<GameObject> _chain = new List<GameObject>();
         bool _firstTile = new bool();
-        for (int z = xSize - 1; z >= 0; z--)
+        for (int z = zSize - 1; z >= 0; z--)
         {
             MeshRenderer platformMesh = grid[column, z].GetComponent<Tile>().platform.GetComponent<MeshRenderer>();
 
@@ -253,13 +261,7 @@ public class BoardManager : MonoBehaviour
         LTSeq seq = LeanTween.sequence();
         for (int x = 0; x < xSize; x++)
         {
-
             AnimateColumn(x);
-
-            for (int z = 0; z < zSize; z++)
-            {
-
-            }
         }
     }
 
@@ -272,88 +274,21 @@ public class BoardManager : MonoBehaviour
 
         LeanTween.move(currentColumn, grid[x, nextTilePos].transform.position, shiftSpeed).setEase(shitAnimCurve).setOnComplete(() =>
                     {
-                        UpdateParents();
+                        UpdatePlatformReference();
 
-                        //currentColumn.transform.DetachChildren();
                         currentChain = FindChain(x);
-                        currentColumn = CreateGroup(x, currentChain);
+                        DestroyGroup(currentColumn);
+                        //currentColumn = CreateGroup(x, currentChain);
 
                         if (nextTilePos > 0)
                         {
-                            Debug.Log("Column: " + x + " has a grid pos of: " + GridTileFromWorldPos(currentColumn.transform.position).z);
+                            //Debug.Log("Column: " + x + " has a grid pos of: " + GridTileFromWorldPos(currentColumn.transform.position).z);
                             //AnimateColumn(x);
 
                         }
                     });
     }
 
-
-
-    /* 
-        public void FindNullTiles()
-        {
-            c
-
-            for (int x = 0; x < xSize; x++)
-            {
-                lowestNullTile = LowestNullTileInList(x, FindNullTilesInColumn(x));
-
-                for (int z = 0; z < zSize; z++)
-                {
-                    Transform thisParent = grid[x, z].transform;
-                    if (grid[x, z].transform.GetChild(0).GetComponent<MeshRenderer>().enabled == false)
-                    {
-                        //current position + shift direction
-                        var upix = x + (int)shiftDirection.x;
-                        var upiz = z + (int)shiftDirection.y;
-
-                        if (upiz < 0 || upix < 0 || upix >= xSize || upiz >= zSize)
-                        {
-                            Debug.Log("x: " + x + " z: " + z + " tried to go outside bounds");
-                            continue;
-                        }
-
-                        GameObject childAbove = grid[upix, upiz].transform.GetChild(0).gameObject;
-                        Transform parentAbove = grid[upix, upiz].transform;
-                        GameObject thisChild = grid[x, z].transform.GetChild(0).gameObject;
-
-                        if (childAbove.GetComponent<MeshRenderer>().enabled != true && parentAbove != null)
-                        {
-                            //skips iteration on tile if
-                            // - child above does not have a color
-                            // - parent above is not empty
-                            continue;
-                        }
-                        if (thisChild.GetComponent<MeshRenderer>().enabled == true && thisChild.transform.parent == null)
-                        {
-                            continue;
-                        }
-
-                        grid[x, z].transform.GetChild(0).parent = parentAbove;
-                        childAbove.transform.parent = thisParent;
-                        Tile tile = parentAbove.GetComponent<Tile>();
-
-                        //error: object reference not set to instance of object
-                        //note: LTseq.addOn;
-                        if (!tempListOfTiles.Contains(tile.transform))
-                        {
-                            seq.append(() => tile.isShifting = true);
-                            seq.append(() => tile.triedToMove = true); //for debug
-                            seq.append(() => tempListOfTiles.Add(tile.transform));
-                        }
-                        seq.append(TileShuffleDelay);
-                        Debug.Log("tweens runnings" + LeanTween.tweensRunning);
-
-                        //Terrible solution with terrible performance.
-                        //LeanTween.move(childAbove, grid[x, z].transform.position, shiftSpeed).setEase(shitAnimCurve).setOnComplete(() => tile.isShifting = false);
-                        FindNullTiles();
-                        seq.append(TileClearDelay);
-                        seq.append(() => ClearTilesIfIdle(seq));
-                    }
-                }
-            }
-        }
-    */
     private void ClearTilesIfIdle(LTSeq seq)
     {
         for (int i = 0; i < tempListOfTiles.Count; i++)
