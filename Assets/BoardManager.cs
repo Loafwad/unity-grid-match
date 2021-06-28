@@ -30,6 +30,8 @@ public class BoardManager : MonoBehaviour
 
     [SerializeField] private bool enableClearSkip = false;
     Vector3 addativeOffset;
+
+    public bool enableText;
     private void Start()
     {
         instance = GetComponent<BoardManager>();
@@ -208,7 +210,7 @@ public class BoardManager : MonoBehaviour
 
                 //grid[_x, _z].GetComponent<Tile>().platform = grid[x, z].GetComponent<Tile>().platform;
                 //grid[x, z].GetComponent<Tile>().platform.transform.SetParent(null);
-                grid[_x, _z].GetComponent<Tile>().platform = grid[_x, _z].GetComponent<Tile>().platform;
+                grid[_x, _z].GetComponent<Tile>().platform = grid[x, z].GetComponent<Tile>().platform;
             }
         }
     }

@@ -646,11 +646,12 @@ MonoBehaviour:
     m_PostInfinity: 2
     m_RotationOrder: 4
   matchingTiles: []
-  offset: {x: 1.1, y: 1.1}
+  offset: {x: 1.05, y: 1.05}
   inheritPrefabOffset: 0
   TileShuffleDelay: 0.05
   TileClearDelay: 0.35
   enableClearSkip: 0
+  enableText: 0
   isShifting: 0
   tempListOfTiles: []
 --- !u!4 &685199452
@@ -1229,6 +1230,43 @@ MonoBehaviour:
     m_RotationOrder: 4
   deselectRotTime: 0.5
   deselectTime: 0.2
+  hoverCurve:
+    serializedVersion: 2
+    m_Curve:
+    - serializedVersion: 3
+      time: 0.001411438
+      value: 0
+      inSlope: -1.2895678
+      outSlope: -1.2895678
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0
+      outWeight: 0.18701535
+    - serializedVersion: 3
+      time: 0.5745848
+      value: 0.6110474
+      inSlope: 6.7707567
+      outSlope: 6.7707567
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0.33333334
+      outWeight: 0.06305565
+    - serializedVersion: 3
+      time: 1
+      value: 1
+      inSlope: 0
+      outSlope: 0
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0
+      outWeight: 0
+    m_PreInfinity: 2
+    m_PostInfinity: 2
+    m_RotationOrder: 4
+  hoverEnterTime: 0.05
+  hoverExitTime: 0.6
+  hoverHeight: 0.4
+  affectNeighbours: 0
 --- !u!1 &1272578905
 GameObject:
   m_ObjectHideFlags: 0
@@ -1651,6 +1689,10 @@ PrefabInstance:
     - target: {fileID: 6825236227529461375, guid: b39b645e25570974f86534dc2205245e, type: 3}
       propertyPath: m_Name
       value: Platform
+      objectReference: {fileID: 0}
+    - target: {fileID: 6825236227529461375, guid: b39b645e25570974f86534dc2205245e, type: 3}
+      propertyPath: m_IsActive
+      value: 0
       objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: b39b645e25570974f86534dc2205245e, type: 3}

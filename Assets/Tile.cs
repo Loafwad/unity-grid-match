@@ -62,28 +62,28 @@ public class Tile : MonoBehaviour
 
         TextMeshPro text = posDisplayText.GetComponent<TextMeshPro>();
 
-        if (!platformMesh)
+        if (!platformMesh || !board.enableText)
         {
             text.enabled = false;
-            platform.gameObject.SetActive(false);
         }
         else
         {
             int zPos = board.GridTileFromWorldPos(platform.transform.position).z;
             text.SetText(zPos.ToString());
+            text.enabled = true;
         }
     }
     #endregion
     private void Select()
     {
-        Hover(true);
+        SelectTile(true);
         isSelected = true;
         previousSelected = gameObject.GetComponent<Tile>();
     }
 
     private void Deselect()
     {
-        Hover(false);
+        SelectTile(false);
         isSelected = false;
         previousSelected = null;
     }
@@ -164,6 +164,41 @@ public class Tile : MonoBehaviour
         return adjacentTiles;
     }
 
+    public List<GameObject> AnimAdjacent(bool includeCorners)
+    {
+        adjacentTiles = new List<GameObject>();
+        for (int x = -1; x <= 1; x++)
+        {
+            for (int z = -1; z <= 1; z++)
+            {
+                int ix = (int)objectGridPosition.x + x;
+                int iz = (int)objectGridPosition.y + z;
+                if (iz < 0 || ix < 0 || ix >= board.xSize || iz >= board.zSize)
+                {
+                    continue;
+                }
+                if (includeCorners)
+                {
+                    if (x == -1 && z == 1 || x == 1 && z == 1 || x == -1 && z == -1 || x == 1 && z == -1)
+                    {
+                        continue;
+                    }
+                }
+                if (board.grid[ix, iz] != null)
+                {
+                    if (adjacentTiles.Contains(board.grid[ix, iz].gameObject))
+                    {
+                        continue;
+                    }
+                    Debug.Log("Added adjacent tile");
+                    adjacentTiles.Add(board.grid[ix, iz].gameObject);
+                }
+            }
+        }
+        return adjacentTiles;
+    }
+
+
     public void ClearAllMatches()
     {
         board.matchingTiles.Clear();
@@ -202,7 +237,7 @@ public class Tile : MonoBehaviour
 
     }
 
-    public void Hover(bool selected)
+    public void SelectTile(bool selected)
     {
         if (selected)
         {
@@ -214,6 +249,16 @@ public class Tile : MonoBehaviour
         }
     }
 
+    public void OnMouseEnter()
+    {
+        anim.EnterHover(platform);
+    }
+
+    public void OnMouseExit()
+    {
+        anim.ExitHover(platform);
+    }
 }
+
 
 

@@ -11,7 +11,8 @@ GameObject:
   - component: {fileID: 5933212502562812084}
   - component: {fileID: 3733473517612153948}
   - component: {fileID: 4696777031707781458}
-  m_Layer: 0
+  - component: {fileID: 6232093925919172739}
+  m_Layer: 6
   m_Name: Text (TMP)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -169,6 +170,18 @@ MonoBehaviour:
   m_maskType: 0
   _SortingLayerID: 0
   _SortingOrder: 0
+--- !u!225 &6232093925919172739
+CanvasGroup:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4164789746445859541}
+  m_Enabled: 1
+  m_Alpha: 1
+  m_Interactable: 1
+  m_BlocksRaycasts: 0
+  m_IgnoreParentGroups: 0
 --- !u!1 &6825236227529461375
 GameObject:
   m_ObjectHideFlags: 0
@@ -181,7 +194,7 @@ GameObject:
   - component: {fileID: 7087565297614986080}
   - component: {fileID: 5024012086257840042}
   - component: {fileID: 6152536793070083088}
-  - component: {fileID: -7564501189643836852}
+  - component: {fileID: 90478987101539225}
   m_Layer: 0
   m_Name: Tile
   m_TagString: Untagged
@@ -352,7 +365,7 @@ MonoBehaviour:
   platformMesh: 0
   adjacentTiles: []
   testGridPos: {x: 0, y: 0}
---- !u!65 &-7564501189643836852
+--- !u!65 &90478987101539225
 BoxCollider:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -363,8 +376,8 @@ BoxCollider:
   m_IsTrigger: 0
   m_Enabled: 1
   serializedVersion: 2
-  m_Size: {x: 0.02, y: 0.019999996, z: 0.0064685033}
-  m_Center: {x: 0, y: -2.515659e-19, z: 0.00012265905}
+  m_Size: {x: 2, y: 2.0000005, z: 0.7}
+  m_Center: {x: 0, y: 0, z: 0}
 --- !u!1 &7191883733936921857
 GameObject:
   m_ObjectHideFlags: 0
