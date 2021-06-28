@@ -1,6 +1,7 @@
 ﻿using UnityEngine;
 using System.Collections;
 using System.Collections.Generic;
+using TMPro;
 
 public class Tile : MonoBehaviour
 {
@@ -27,6 +28,8 @@ public class Tile : MonoBehaviour
     [SerializeField] public bool isShifting;
     [SerializeField] public bool triedToMove;
 
+    [SerializeField] public GameObject posDisplayText;
+
     [Header("State info")]
     public bool platformMesh;
 
@@ -40,7 +43,6 @@ public class Tile : MonoBehaviour
     #region Awake/Start/Update
     void Awake()
     {
-        render = platform.GetComponent<MeshRenderer>();
         anim = GameObject.Find("BoardAnimator").GetComponent<GridAnimations>();
     }
     void Start()
@@ -53,8 +55,23 @@ public class Tile : MonoBehaviour
 
     void Update()
     {
-        platformMesh = this.platform.GetComponent<MeshRenderer>().enabled;
+
+        platform = board.grid[(int)objectGridPosition.x, (int)objectGridPosition.y].GetComponent<Tile>().platform;
         color = this.platform.GetComponent<MeshRenderer>().sharedMaterial.name;
+        platformMesh = this.platform.GetComponent<MeshRenderer>().enabled;
+
+        TextMeshPro text = posDisplayText.GetComponent<TextMeshPro>();
+
+        if (!platformMesh)
+        {
+            text.enabled = false;
+            platform.gameObject.SetActive(false);
+        }
+        else
+        {
+            int zPos = board.GridTileFromWorldPos(platform.transform.position).z;
+            text.SetText(zPos.ToString());
+        }
     }
     #endregion
     private void Select()
