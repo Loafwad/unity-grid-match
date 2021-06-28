@@ -102,7 +102,7 @@ public class Tile : MonoBehaviour
         if (x >= 0 && x < board.xSize && z >= 0 && z < board.zSize)
         {
             if (board.grid[x, z] != null
-            && board.grid[x, z].transform.GetChild(0).GetComponent<MeshRenderer>().sharedMaterial == this.transform.GetChild(0).GetComponent<MeshRenderer>().sharedMaterial
+            && board.grid[x, z].GetComponent<Tile>().platform.GetComponent<MeshRenderer>().sharedMaterial == this.platform.GetComponent<MeshRenderer>().sharedMaterial
             && !board.matchingTiles.Contains(board.grid[x, z].gameObject))
             {
                 board.matchingTiles.Add(board.grid[x, z].gameObject);
@@ -159,7 +159,7 @@ public class Tile : MonoBehaviour
             for (int j = 0; j < board.matchingTiles.Count; j++)
             {
                 Debug.Log("Removed " + board.matchingTiles.Count + " tiles");
-                board.matchingTiles[j].transform.GetChild(0).GetComponent<MeshRenderer>().enabled = false;
+                board.matchingTiles[j].transform.GetComponent<Tile>().platform.GetComponent<MeshRenderer>().enabled = false;
             }
         }
     }
