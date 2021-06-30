@@ -112,7 +112,6 @@ public class BoardManager : MonoBehaviour
                 gridTile.name = "x = " + x + " || " + " z = " + z;
                 grid[x, z] = gridTile;
                 gridTile.transform.SetParent(tempParent.transform);
-                //gridTile.transform.parent = tempParent.transform;
                 gridTile.GetComponent<Tile>().objectGridPosition = new Vector2(x, z);
 
                 List<GameObject> possibleCharacters = new List<GameObject>();
@@ -146,16 +145,13 @@ public class BoardManager : MonoBehaviour
 
     private int LowestGridPos(int column, List<GameObject> list)
     {
-        //whenever given a list it does not care where the start of that list might be
-
         int lowest = xSize - 1;
         int lowestGridTile = 0;
         Debug.Log("starting search with: " + list.Count);
         foreach (GameObject tile in list)
         {
-            int tilePos = GridTileFromWorldPos(tile.transform.position).z;
+            int tilePos = (int)GridPosFromWorldPos(tile.transform.position).z;
 
-            //Debug.Log("Tile position: " + tilePos + "in column: " + column);
             if (tilePos <= lowest)
             {
                 lowestGridTile++;
@@ -167,12 +163,10 @@ public class BoardManager : MonoBehaviour
         return lowest;
     }
 
-    public (int x, int z) GridTileFromWorldPos(Vector3 worldPos)
+    public (int x, int z) GridPosFromWorldPos(Vector3 worldPos)
     {
         int x = Mathf.RoundToInt(worldPos.x / addativeOffset.x) * (int)addativeOffset.x / 2;
         int z = Mathf.RoundToInt(worldPos.z / addativeOffset.y) * (int)addativeOffset.y / 2;
-
-        // 2.2 / 1
 
         return (x, z);
     }
@@ -195,8 +189,7 @@ public class BoardManager : MonoBehaviour
 
     private void DestroyGroup(GameObject group)
     {
-        //group.transform.DetachChildren();
-        //Destroy(group);
+
     }
 
     public void UpdatePlatformReference()
@@ -205,21 +198,12 @@ public class BoardManager : MonoBehaviour
         {
             for (int z = 0; z < zSize; z++)
             {
-                int _z = GridTileFromWorldPos(grid[x, z].GetComponent<Tile>().platform.transform.position).z;
-                int _x = GridTileFromWorldPos(grid[x, z].GetComponent<Tile>().platform.transform.position).x;
 
-                //grid[_x, _z].GetComponent<Tile>().platform = grid[x, z].GetComponent<Tile>().platform;
-                //grid[x, z].GetComponent<Tile>().platform.transform.SetParent(null);
-                grid[_x, _z].GetComponent<Tile>().platform = grid[x, z].GetComponent<Tile>().platform;
             }
         }
     }
     private List<GameObject> FindChain(int column)
     {
-        //never gets past x amount of tiles because some GridTiles already have a child with a platform that is disabled.
-        //potential fixes:
-        //- update parentes and platform references.
-        //- move children of GridTiles (i believe GridToWorldPosition might find them instead of the actualy platform that is enabled)
         List<GameObject> chain = new List<GameObject>();
         bool _firstTile = new bool();
         for (int z = zSize - 1; z >= 0; z--)
@@ -238,7 +222,6 @@ public class BoardManager : MonoBehaviour
             }
             else { continue; }
         }
-        //Debug.Log("Found: " + _chain.Count + " in current chain: " + column);
         _firstTile = false;
         return chain;
     }
@@ -260,9 +243,6 @@ public class BoardManager : MonoBehaviour
         return 0;
     }
 
-    //called after initial local match
-    int test = 0;
-
     public void ShiftBoard()
     {
         LTSeq seq = LeanTween.sequence();
@@ -274,7 +254,6 @@ public class BoardManager : MonoBehaviour
 
     void AnimateColumn(int x)
     {
-        UpdatePlatformReference();
         List<GameObject> currentChain = FindChain(x);
         int lowestChainPos = LowestGridPos(x, currentChain);
         GameObject currentColumn = CreateGroup(FindChain(x), x, lowestChainPos);
@@ -282,17 +261,19 @@ public class BoardManager : MonoBehaviour
 
         LeanTween.move(currentColumn, grid[x, nextTilePos].transform.position, shiftSpeed).setEase(shitAnimCurve).setOnComplete(() =>
                     {
+                        int distanceMoved = lowestChainPos - nextTilePos;
 
-                        //currentChain = FindChain(x);
-                        UpdatePlatformReference();
-                        DestroyGroup(currentColumn);
-                        //currentColumn = CreateGroup(x, currentChain);
-
-                        if (nextTilePos > 0)
+                        for (int z = 0; z < currentChain.Count; z++)
                         {
-                            //Debug.Log("Column: " + x + " has a grid pos of: " + GridTileFromWorldPos(currentColumn.transform.position).z);
-                            //AnimateColumn(x);
+                            int currentTile = lowestChainPos + z;
+                            int nextPos = lowestChainPos - distanceMoved + z;
 
+                            GameObject tempPlatorm = grid[x, currentTile].GetComponent<Tile>().platform;
+
+                            grid[x, currentTile].GetComponent<Tile>().platform = grid[x, nextPos].GetComponent<Tile>().platform;
+
+                            Tile tile = grid[x, nextPos].GetComponent<Tile>();
+                            tile.platform = tempPlatorm;
                         }
                     });
     }

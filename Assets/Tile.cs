@@ -47,20 +47,18 @@ public class Tile : MonoBehaviour
     }
     void Start()
     {
-        (int x, int z) test = board.GridTileFromWorldPos(this.transform.position);
-        testGridPos = new Vector2(test.x, test.z);
+        int x = (int)board.GridPosFromWorldPos(this.transform.position).z;
+        int z = (int)board.GridPosFromWorldPos(this.transform.position).z;
         objectPosition = new Vector3(transform.position.x, 0, transform.position.z);
         color = platform.GetComponent<MeshRenderer>().sharedMaterial.name;
     }
 
     void Update()
     {
-
-        platform = board.grid[(int)objectGridPosition.x, (int)objectGridPosition.y].GetComponent<Tile>().platform;
         color = this.platform.GetComponent<MeshRenderer>().sharedMaterial.name;
         platformMesh = this.platform.GetComponent<MeshRenderer>().enabled;
 
-        TextMeshPro text = posDisplayText.GetComponent<TextMeshPro>();
+        TextMeshPro text = platform.GetComponentInChildren<TextMeshPro>();
 
         if (!platformMesh || !board.enableText)
         {
@@ -68,7 +66,7 @@ public class Tile : MonoBehaviour
         }
         else
         {
-            int zPos = board.GridTileFromWorldPos(platform.transform.position).z;
+            int zPos = board.GridPosFromWorldPos(platform.transform.position).z;
             text.SetText(zPos.ToString());
             text.enabled = true;
         }
