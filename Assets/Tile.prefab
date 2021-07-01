@@ -192,7 +192,7 @@ GameObject:
   m_Component:
   - component: {fileID: 6193518777334043845}
   - component: {fileID: 7087565297614986080}
-  - component: {fileID: 5024012086257840042}
+  - component: {fileID: 6093163390023331967}
   - component: {fileID: 6152536793070083088}
   - component: {fileID: 90478987101539225}
   m_Layer: 0
@@ -200,7 +200,7 @@ GameObject:
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
+  m_StaticEditorFlags: 4294967295
   m_IsActive: 1
 --- !u!4 &6193518777334043845
 Transform:
@@ -225,7 +225,7 @@ MeshFilter:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 6825236227529461375}
   m_Mesh: {fileID: -2228417370725966487, guid: dd93e6bf62d928d4e83f9753b668e214, type: 3}
---- !u!23 &5024012086257840042
+--- !u!23 &6093163390023331967
 MeshRenderer:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -244,7 +244,7 @@ MeshRenderer:
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
-  - {fileID: 2100000, guid: 7b5d75294157a594eb9cb18824c91f7c, type: 2}
+  - {fileID: 0}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0
@@ -323,48 +323,11 @@ MonoBehaviour:
     m_PostInfinity: 2
     m_RotationOrder: 4
   animSwitchDuration: 0.3
-  animRotateCurve:
-    serializedVersion: 2
-    m_Curve:
-    - serializedVersion: 3
-      time: 0
-      value: 0
-      inSlope: 0
-      outSlope: 0
-      tangentMode: 0
-      weightedMode: 0
-      inWeight: 0
-      outWeight: 0
-    - serializedVersion: 3
-      time: 0.5509838
-      value: 0.9340775
-      inSlope: 1.186152
-      outSlope: 1.186152
-      tangentMode: 0
-      weightedMode: 0
-      inWeight: 0.33333334
-      outWeight: 0.33333334
-    - serializedVersion: 3
-      time: 1
-      value: 1
-      inSlope: 0
-      outSlope: 0
-      tangentMode: 0
-      weightedMode: 0
-      inWeight: 0
-      outWeight: 0
-    m_PreInfinity: 2
-    m_PostInfinity: 2
-    m_RotationOrder: 4
-  rotationTime: 0.5
   objectGridPosition: {x: 0, y: 0}
   objectPosition: {x: 0, y: 0, z: 0}
   isShifting: 0
-  triedToMove: 0
-  posDisplayText: {fileID: 4164789746445859541}
   platformMesh: 0
   adjacentTiles: []
-  testGridPos: {x: 0, y: 0}
 --- !u!65 &90478987101539225
 BoxCollider:
   m_ObjectHideFlags: 0

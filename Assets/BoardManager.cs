@@ -29,11 +29,14 @@ public class BoardManager : MonoBehaviour
     [Header("Debug Tools")]
 
     [SerializeField] private bool enableClearSkip = false;
-    Vector3 addativeOffset;
+    private Vector3 addativeOffset;
+
+    [SerializeField] private List<GameObject> listOfColumns;
 
     public bool enableText;
     private void Start()
     {
+
         instance = GetComponent<BoardManager>();
 
         LeanTween.init(5000);
@@ -45,11 +48,20 @@ public class BoardManager : MonoBehaviour
         else
             addativeOffset = offset * prefabOffset;
 
+
         CreateBoard(addativeOffset.x, addativeOffset.y);
+
+        for (int x = 0; x < xSize; x++)
+        {
+            CreateGroup(FindChain(x), x);
+        }
+
+        InvokeRepeating("ShiftBoard", 0.5f, 0.5f);
     }
 
     private void Update()
     {
+
         if (Input.GetKeyDown(KeyCode.F))
         {
             ShiftBoard();
@@ -57,6 +69,29 @@ public class BoardManager : MonoBehaviour
         if (Input.GetKeyDown(KeyCode.R))
         {
             RemoveRandomTiles();
+        }
+    }
+
+    private GridAnimations anim;
+
+    public void FlipAllTiles()
+    {
+        anim = GameObject.Find("BoardAnimator").GetComponent<GridAnimations>();
+        List<Tile> listTile = new List<Tile>();
+        reverse = !reverse;
+        for (int x = 0; x < xSize; x++)
+        {
+            StartCoroutine(DelayAnimation(listTile, x));
+        }
+    }
+    bool reverse;
+    IEnumerator DelayAnimation(List<Tile> listTile, int x)
+    {
+        WaitForSeconds wait = new WaitForSeconds(anim.loadTileDelay);
+        for (int z = 0; z < zSize; z++)
+        {
+            anim.TileLoad(grid[x, z].GetComponent<Tile>().platform, reverse);
+            yield return wait;
         }
     }
 
@@ -68,7 +103,8 @@ public class BoardManager : MonoBehaviour
             {
                 if (Random.value < 0.1f)
                 {
-                    grid[x, z].GetComponent<Tile>().platform.GetComponent<MeshRenderer>().enabled = false;
+                    //grid[x, z].GetComponent<Tile>().platform.GetComponent<MeshRenderer>().enabled = false;
+                    grid[x, z].GetComponent<Tile>().DisableTile();
                 }
             }
         }
@@ -111,6 +147,7 @@ public class BoardManager : MonoBehaviour
                 GameObject gridTile = Instantiate(tile, new Vector3(startX + (xOffset * x), 0, startZ + (zOffset * z)), tile.transform.rotation);
                 gridTile.name = "x = " + x + " || " + " z = " + z;
                 grid[x, z] = gridTile;
+                tempParent.transform.position = grid[x, 0].transform.position;
                 gridTile.transform.SetParent(tempParent.transform);
                 gridTile.GetComponent<Tile>().objectGridPosition = new Vector2(x, z);
 
@@ -125,41 +162,20 @@ public class BoardManager : MonoBehaviour
             }
         }
     }
-    [SerializeField] public bool isShifting;
-
-    [SerializeField] List<Transform> tempListOfTiles = new List<Transform>();
-
-    private List<GameObject> FindAllEmptyGridTiles(int column)
-    {
-        List<GameObject> listOfNullTiles = new List<GameObject>();
-        for (int z = zSize - 1; z >= 0; z--)
-        {
-            if (grid[column, z].GetComponent<Tile>().platform.GetComponent<MeshRenderer>().enabled == false)
-            {
-                listOfNullTiles.Add(grid[column, z]);
-            }
-        }
-        Debug.Log("Found: " + listOfNullTiles.Count + " null tiles in column: " + column);
-        return listOfNullTiles;
-    }
 
     private int LowestGridPos(int column, List<GameObject> list)
     {
         int lowest = xSize - 1;
-        int lowestGridTile = 0;
-        Debug.Log("starting search with: " + list.Count);
+
         foreach (GameObject tile in list)
         {
             int tilePos = (int)GridPosFromWorldPos(tile.transform.position).z;
 
             if (tilePos <= lowest)
             {
-                lowestGridTile++;
                 lowest = tilePos;
-                Debug.Log("Lowest tile was: " + lowest + "in column: " + column + "We went through: " + lowestGridTile + "tiles");
             }
         }
-        Debug.Log("Found lowest tile at: " + lowest + "in column: " + column);
         return lowest;
     }
 
@@ -171,37 +187,35 @@ public class BoardManager : MonoBehaviour
         return (x, z);
     }
 
-    int lowestNullTile;
-
-    private GameObject CreateGroup(List<GameObject> chain, int x, int z)
+    private List<GameObject> CreateGroup(List<GameObject> chain, int x)
     {
         GameObject columnObject = new GameObject();
         columnObject.transform.parent = this.transform;
         columnObject.transform.position = grid[x, LowestGridPos(x, chain)].transform.position;
         columnObject.transform.name = "ColumnObject: " + x;
+        listOfColumns.Add(columnObject);
 
-        foreach (GameObject platform in chain)
+        return listOfColumns;
+    }
+
+    private GameObject PoolGroup(List<GameObject> chain, int x, int columnPos)
+    {
+        //major performance issue!!
+        //note: deatching all children shouldn't be necessary as some objects in the list of chains should already be parented to the columnObject. They just need to be reorganized by possibly using SetSiblingIndex and only parenting the objects of child if they are not already parented to it.
+
+        GameObject columnObject = listOfColumns[x];
+        columnObject.transform.DetachChildren();
+
+        columnObject.transform.position = grid[x, columnPos].transform.position;
+
+        for (int j = 0; j < chain.Count; j++)
         {
-            platform.transform.SetParent(columnObject.transform, true);
+            chain[j].transform.SetParent(columnObject.transform, true);
         }
+
         return columnObject;
     }
 
-    private void DestroyGroup(GameObject group)
-    {
-
-    }
-
-    public void UpdatePlatformReference()
-    {
-        for (int x = 0; x < xSize; x++)
-        {
-            for (int z = 0; z < zSize; z++)
-            {
-
-            }
-        }
-    }
     private List<GameObject> FindChain(int column)
     {
         List<GameObject> chain = new List<GameObject>();
@@ -213,11 +227,10 @@ public class BoardManager : MonoBehaviour
             if (tile.platformMesh == true)
             {
                 _firstTile = true;
-                chain.Add(grid[column, z].GetComponent<Tile>().platform);
+                chain.Add(tile.platform);
             }
             else if (_firstTile)
             {
-                Debug.Log("Found: " + chain.Count + " in current chain: " + column);
                 return chain;
             }
             else { continue; }
@@ -256,27 +269,39 @@ public class BoardManager : MonoBehaviour
     {
         List<GameObject> currentChain = FindChain(x);
         int lowestChainPos = LowestGridPos(x, currentChain);
-        GameObject currentColumn = CreateGroup(FindChain(x), x, lowestChainPos);
+        if (lowestChainPos == 0)
+        {
+            return;
+        }
+        GameObject currentColumn = PoolGroup(currentChain, x, lowestChainPos);
         int nextTilePos = NextTilePos(x, lowestChainPos);
 
-        LeanTween.move(currentColumn, grid[x, nextTilePos].transform.position, shiftSpeed).setEase(shitAnimCurve).setOnComplete(() =>
+        LeanTween.moveZ(currentColumn, grid[x, nextTilePos].transform.position.z, shiftSpeed).setEase(shitAnimCurve).setOnComplete(() =>
                     {
                         int distanceMoved = lowestChainPos - nextTilePos;
 
                         for (int z = 0; z < currentChain.Count; z++)
                         {
-                            int currentTile = lowestChainPos + z;
+
+                            int currentTilePos = lowestChainPos + z;
                             int nextPos = lowestChainPos - distanceMoved + z;
 
-                            GameObject tempPlatorm = grid[x, currentTile].GetComponent<Tile>().platform;
+                            Tile currentTile = grid[x, currentTilePos].GetComponent<Tile>();
+                            Tile nextTile = grid[x, nextPos].GetComponent<Tile>();
 
-                            grid[x, currentTile].GetComponent<Tile>().platform = grid[x, nextPos].GetComponent<Tile>().platform;
+                            GameObject tempPlatorm = currentTile.platform;
 
-                            Tile tile = grid[x, nextPos].GetComponent<Tile>();
-                            tile.platform = tempPlatorm;
+                            currentTile.platform = nextTile.platform;
+                            nextTile.platform = tempPlatorm;
+
+                            nextTile.UpdateTileInfo();
+                            currentTile.UpdateTileInfo();
+
                         }
                     });
     }
+
+    [SerializeField] List<Transform> tempListOfTiles = new List<Transform>();
 
     private void ClearTilesIfIdle(LTSeq seq)
     {

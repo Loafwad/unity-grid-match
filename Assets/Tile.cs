@@ -7,7 +7,6 @@ public class Tile : MonoBehaviour
 {
     private static Tile previousSelected = null;
 
-    private MeshRenderer render;
     private bool isSelected = false;
     public string color;
     BoardManager board = BoardManager.instance;
@@ -18,17 +17,10 @@ public class Tile : MonoBehaviour
     public AnimationCurve animSwitchCurve;
     public float animSwitchDuration = 1f;
 
-    [Header("Rotation On Select Animation")]
-    [SerializeField] private AnimationCurve animRotateCurve;
-    [SerializeField] private float rotationTime = 1f;
-
     [Header("Position Info")]
     [SerializeField] public Vector2 objectGridPosition;
     [SerializeField] private Vector3 objectPosition;
     [SerializeField] public bool isShifting;
-    [SerializeField] public bool triedToMove;
-
-    [SerializeField] public GameObject posDisplayText;
 
     [Header("State info")]
     public bool platformMesh;
@@ -36,9 +28,7 @@ public class Tile : MonoBehaviour
 
     [SerializeField]
     private List<GameObject> adjacentTiles;
-    public Vector2 testGridPos;
-
-
+    MeshRenderer mesh;
 
     #region Awake/Start/Update
     void Awake()
@@ -47,18 +37,37 @@ public class Tile : MonoBehaviour
     }
     void Start()
     {
+        UpdateTileInfo();
+
         int x = (int)board.GridPosFromWorldPos(this.transform.position).z;
         int z = (int)board.GridPosFromWorldPos(this.transform.position).z;
         objectPosition = new Vector3(transform.position.x, 0, transform.position.z);
-        color = platform.GetComponent<MeshRenderer>().sharedMaterial.name;
     }
+
+    public void DisableTile()
+    {
+        mesh.enabled = false;
+        UpdateTileInfo();
+    }
+
+    public MeshRenderer UpdateTileInfo()
+    {
+        mesh = platform.GetComponent<MeshRenderer>();
+        color = mesh.sharedMaterial.name;
+        platformMesh = mesh.enabled;
+        text = platform.GetComponentInChildren<TextMeshPro>();
+
+        //Debug.Log("UPDATED MESH!");
+
+        return mesh;
+    }
+
+    TextMeshPro text;
 
     void Update()
     {
-        color = this.platform.GetComponent<MeshRenderer>().sharedMaterial.name;
-        platformMesh = this.platform.GetComponent<MeshRenderer>().enabled;
 
-        TextMeshPro text = platform.GetComponentInChildren<TextMeshPro>();
+        //UpdateMesh();
 
         if (!platformMesh || !board.enableText)
         {
@@ -196,7 +205,6 @@ public class Tile : MonoBehaviour
         return adjacentTiles;
     }
 
-
     public void ClearAllMatches()
     {
         board.matchingTiles.Clear();
@@ -249,7 +257,9 @@ public class Tile : MonoBehaviour
 
     public void OnMouseEnter()
     {
-        anim.EnterHover(platform);
+        //anim.EnterHover(platform);
+        anim.TileSelection(platform);
+
     }
 
     public void OnMouseExit()
