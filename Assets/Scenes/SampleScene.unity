@@ -376,8 +376,8 @@ MonoBehaviour:
   - {fileID: 7767526736648998531, guid: 50b987c1b193ee94882d90bf2446b729, type: 3}
   - {fileID: 4431933056309372495, guid: 62df7f6176a981d40bf2ba4bd6264a52, type: 3}
   prefabTile: {fileID: 6825236227529461375, guid: b39b645e25570974f86534dc2205245e, type: 3}
-  xSize: 25
-  zSize: 25
+  xSize: 55
+  zSize: 55
   shiftDirection: {x: 0, y: 1}
   shiftSpeed: 0.1
   shitAnimCurve:
@@ -412,7 +412,6 @@ MonoBehaviour:
   enableClearSkip: 0
   listOfColumns: []
   enableText: 0
-  tempListOfTiles: []
 --- !u!4 &685199452
 Transform:
   m_ObjectHideFlags: 0
@@ -420,14 +419,14 @@ Transform:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 685199450}
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalRotation: {x: -0.7071068, y: 0, z: 0, w: 0.7071068}
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children:
   - {fileID: 1071680931}
   m_Father: {fileID: 0}
   m_RootOrder: 3
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+  m_LocalEulerAnglesHint: {x: -90, y: 0, z: 0}
 --- !u!1 &705507993
 GameObject:
   m_ObjectHideFlags: 0
@@ -1200,22 +1199,31 @@ MonoBehaviour:
     serializedVersion: 2
     m_Curve:
     - serializedVersion: 3
-      time: 0
+      time: -0
       value: 0
-      inSlope: 0
-      outSlope: 0
+      inSlope: 0.22516245
+      outSlope: 0.22516245
       tangentMode: 0
       weightedMode: 0
       inWeight: 0
-      outWeight: 0
+      outWeight: 0.29607242
     - serializedVersion: 3
-      time: 1
+      time: 0.5
       value: 1
       inSlope: 0
       outSlope: 0
+      tangentMode: 34
+      weightedMode: 0
+      inWeight: 0.33333334
+      outWeight: 0.33333334
+    - serializedVersion: 3
+      time: 1
+      value: 0
+      inSlope: 0.16322538
+      outSlope: 0.16322538
       tangentMode: 0
       weightedMode: 0
-      inWeight: 0
+      inWeight: 0.37554157
       outWeight: 0
     m_PreInfinity: 2
     m_PostInfinity: 2
@@ -1226,14 +1234,14 @@ MonoBehaviour:
     - serializedVersion: 3
       time: 0
       value: 0
-      inSlope: 2
-      outSlope: 2
+      inSlope: 0
+      outSlope: 0
       tangentMode: 0
       weightedMode: 0
       inWeight: 0
       outWeight: 0
     - serializedVersion: 3
-      time: 1
+      time: 0.49365234
       value: 1
       inSlope: 0
       outSlope: 0
@@ -1245,7 +1253,7 @@ MonoBehaviour:
     m_PostInfinity: 2
     m_RotationOrder: 4
   loadRaiseTime: 1
-  loadFlipRotationTime: 2
+  loadFlipRotationTime: 1
   loadTileDelay: 0.1
   lrheight: 2
 --- !u!1 &1437930592

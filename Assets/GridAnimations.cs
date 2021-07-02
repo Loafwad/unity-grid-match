@@ -37,23 +37,11 @@ public class GridAnimations : MonoBehaviour
 
     public void TileLoad(GameObject platform, bool toggle)
     {
-        Vector3 orgRot = new Vector3(-90, 0, 0);
-        if (toggle)
-        {
-            LeanTween.moveY(platform, orgRot.y + lrheight, loadRaiseTime).setEase(loadRaiseCurve).setOnComplete(() =>
-                    {
-                        LeanTween.moveY(platform, platform.transform.position.y - lrheight, loadRaiseTime).setEase(loadRaiseCurve);
-                    });
-            LeanTween.rotate(platform, orgRot + (new Vector3(180, 0, 0)), loadFlipRotationTime).setEase(loadRotationCurve);
-        }
-        else
-        {
-            LeanTween.moveY(platform, orgRot.y + lrheight, loadRaiseTime).setEase(loadRaiseCurve).setOnComplete(() =>
-                       {
-                           LeanTween.moveY(platform, platform.transform.position.y - lrheight, loadRaiseTime).setEase(loadRaiseCurve);
-                       });
-            LeanTween.rotate(platform, orgRot, loadFlipRotationTime).setEase(loadRotationCurve);
-        }
+        platform.transform.position = new Vector3(platform.transform.position.x, 0, platform.transform.position.z);
+        platform.transform.eulerAngles = new Vector3(-90, 0, 0);
+        LeanTween.moveY(platform, lrheight, loadRaiseTime).setEase(loadRaiseCurve);
+
+        LeanTween.rotateAroundLocal(platform, new Vector3(1, 0, 0), 180, loadFlipRotationTime).setEase(loadRotationCurve);
     }
     public void TileSelection(GameObject platform)
     {

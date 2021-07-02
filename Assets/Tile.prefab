@@ -328,7 +328,7 @@ MonoBehaviour:
   objectPosition: {x: 0, y: 0, z: 0}
   isShifting: 0
   platformMesh: 0
-  adjacentTiles: []
+  _adjacentTiles: []
 --- !u!65 &90478987101539225
 BoxCollider:
   m_ObjectHideFlags: 0

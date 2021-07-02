@@ -300,25 +300,4 @@ public class BoardManager : MonoBehaviour
                           });
                       });
     }
-
-    [SerializeField] List<Transform> tempListOfTiles = new List<Transform>();
-
-    private void ClearTilesIfIdle(LTSeq seq)
-    {
-        for (int i = 0; i < tempListOfTiles.Count; i++)
-        {
-            if (tempListOfTiles[i].gameObject.GetComponent<Tile>().isShifting == false)
-            {
-                //ToggleShiftDirection();
-                Debug.LogWarning("Clearing Tiles");
-                tempListOfTiles.Clear();
-                seq.append(TileShuffleDelay);
-                //seq.append(FindNullTiles);
-            }
-            else
-            {
-                Debug.LogWarning("Tiles are still shifting, be patient");
-            }
-        }
-    }
 }
