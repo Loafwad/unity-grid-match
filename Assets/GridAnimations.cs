@@ -23,7 +23,6 @@ public class GridAnimations : MonoBehaviour
     [SerializeField] private float hoverEnterTime;
     [SerializeField] private float hoverExitTime;
     [SerializeField] private float hoverHeight;
-    [SerializeField] bool affectNeighbours;
 
     [Header("Tile Load")]
 
@@ -34,25 +33,27 @@ public class GridAnimations : MonoBehaviour
     [SerializeField] private float loadFlipRotationTime;
     [SerializeField] public float loadTileDelay;
 
+    [SerializeField] private int lrheight;
+
     public void TileLoad(GameObject platform, bool toggle)
     {
+        Vector3 orgRot = new Vector3(-90, 0, 0);
         if (toggle)
         {
-            LeanTween.moveY(platform, platform.transform.parent.position.y + 5, loadRaiseTime).setEase(loadRaiseCurve).setOnComplete(() =>
+            LeanTween.moveY(platform, orgRot.y + lrheight, loadRaiseTime).setEase(loadRaiseCurve).setOnComplete(() =>
                     {
-                        LeanTween.moveY(platform, platform.transform.position.y - 5, loadRaiseTime).setEase(loadRaiseCurve);
+                        LeanTween.moveY(platform, platform.transform.position.y - lrheight, loadRaiseTime).setEase(loadRaiseCurve);
                     });
-            LeanTween.rotate(platform, platform.transform.parent.eulerAngles + (platform.transform.eulerAngles * 2), loadFlipRotationTime).setEase(loadRotationCurve);
+            LeanTween.rotate(platform, orgRot + (new Vector3(180, 0, 0)), loadFlipRotationTime).setEase(loadRotationCurve);
         }
         else
         {
-            LeanTween.moveY(platform, platform.transform.parent.position.y + 5, loadRaiseTime).setEase(loadRaiseCurve).setOnComplete(() =>
-                     {
-                         LeanTween.moveY(platform, platform.transform.position.y - 5, loadRaiseTime).setEase(loadRaiseCurve);
-                     });
-            LeanTween.rotate(platform, platform.transform.parent.eulerAngles, loadFlipRotationTime).setEase(loadRotationCurve);
+            LeanTween.moveY(platform, orgRot.y + lrheight, loadRaiseTime).setEase(loadRaiseCurve).setOnComplete(() =>
+                       {
+                           LeanTween.moveY(platform, platform.transform.position.y - lrheight, loadRaiseTime).setEase(loadRaiseCurve);
+                       });
+            LeanTween.rotate(platform, orgRot, loadFlipRotationTime).setEase(loadRotationCurve);
         }
-
     }
     public void TileSelection(GameObject platform)
     {
@@ -63,42 +64,19 @@ public class GridAnimations : MonoBehaviour
 
     public void TileDeselection(GameObject platform)
     {
-        LeanTween.rotate(platform, platform.transform.parent.transform.eulerAngles, deselectRotTime).setEase(deselectRotCurve);
-        LeanTween.moveY(platform, platform.transform.position.y - 1, deselectTime).setEase(deselectCurve).setOnComplete(() =>
-        {
-            platform.transform.position = platform.transform.parent.transform.position;
-        });
+        LeanTween.rotate(platform, new Vector3(90, 0, 0), deselectRotTime).setEase(deselectRotCurve);
+        LeanTween.moveY(platform, new Vector3(0, 0, 0).y, deselectTime).setEase(deselectCurve);
 
     }
 
     public void EnterHover(GameObject platform)
     {
-        if (!affectNeighbours)
-        {
-            LeanTween.moveY(platform, platform.transform.position.y + hoverHeight, hoverEnterTime).setEase(hoverCurve);
-        }
-        else
-        {
-            foreach (GameObject item in platform.transform.parent.GetComponent<Tile>().AnimAdjacent(false))
-            {
-                LeanTween.moveY(item, item.transform.position.y + hoverHeight, hoverEnterTime).setEase(hoverCurve);
-            }
-        }
+        LeanTween.moveY(platform, platform.transform.position.y + hoverHeight, hoverEnterTime).setEase(hoverCurve);
     }
 
     public void ExitHover(GameObject platform)
     {
-        if (!affectNeighbours)
-        {
-            LeanTween.moveY(platform, platform.transform.parent.transform.position.y, hoverExitTime).setEase(hoverCurve);
-        }
-        else
-        {
-            foreach (GameObject item in platform.transform.parent.GetComponent<Tile>().AnimAdjacent(false))
-            {
-                LeanTween.moveY(item, item.transform.parent.transform.position.y, hoverExitTime).setEase(hoverCurve);
-            }
-        }
+        LeanTween.moveY(platform, 0, hoverExitTime).setEase(hoverCurve);
     }
 
 }

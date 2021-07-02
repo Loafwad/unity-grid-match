@@ -6,7 +6,7 @@ public class BoardManager : MonoBehaviour
 {
     public static BoardManager instance;
     public List<GameObject> characters = new List<GameObject>();
-    public GameObject tile;
+    public GameObject prefabTile;
     public int xSize, zSize;
 
     public GameObject[,] grid;
@@ -41,7 +41,7 @@ public class BoardManager : MonoBehaviour
 
         LeanTween.init(5000);
 
-        MeshRenderer prefabTileMesh = tile.GetComponent<MeshRenderer>();
+        MeshRenderer prefabTileMesh = prefabTile.GetComponent<MeshRenderer>();
         Vector2 prefabOffset = new Vector2(prefabTileMesh.bounds.size.x, prefabTileMesh.bounds.size.z);
         if (inheritPrefabOffset)
             addativeOffset = prefabOffset;
@@ -56,20 +56,7 @@ public class BoardManager : MonoBehaviour
             CreateGroup(FindChain(x), x);
         }
 
-        InvokeRepeating("ShiftBoard", 0.5f, 0.5f);
-    }
-
-    private void Update()
-    {
-
-        if (Input.GetKeyDown(KeyCode.F))
-        {
-            ShiftBoard();
-        }
-        if (Input.GetKeyDown(KeyCode.R))
-        {
-            RemoveRandomTiles();
-        }
+        //InvokeRepeating("ShiftBoard", 0.5f, 0.5f);
     }
 
     private GridAnimations anim;
@@ -108,6 +95,7 @@ public class BoardManager : MonoBehaviour
                 }
             }
         }
+        ShiftBoard();
     }
 
     public void ToggleShiftDirection()
@@ -132,6 +120,7 @@ public class BoardManager : MonoBehaviour
 
         GameObject[] previousLeft = new GameObject[zSize];
         GameObject previousBelow = null;
+
         for (int x = 0; x < xSize; x++)
         {
             GameObject tempParent = new GameObject();
@@ -144,7 +133,7 @@ public class BoardManager : MonoBehaviour
                         continue;
                     }
                 }
-                GameObject gridTile = Instantiate(tile, new Vector3(startX + (xOffset * x), 0, startZ + (zOffset * z)), tile.transform.rotation);
+                GameObject gridTile = Instantiate(prefabTile, new Vector3(startX + (xOffset * x), 0, startZ + (zOffset * z)), prefabTile.transform.rotation);
                 gridTile.name = "x = " + x + " || " + " z = " + z;
                 grid[x, z] = gridTile;
                 tempParent.transform.position = grid[x, 0].transform.position;
@@ -157,8 +146,11 @@ public class BoardManager : MonoBehaviour
                 possibleCharacters.Remove(previousLeft[z]);
                 possibleCharacters.Remove(previousBelow);
 
-                GameObject allowedTile = characters[Random.Range(0, possibleCharacters.Count)];
+                GameObject allowedTile = possibleCharacters[Random.Range(0, possibleCharacters.Count)];
                 gridTile.transform.GetChild(0).GetComponent<MeshRenderer>().sharedMaterial = allowedTile.GetComponent<MeshRenderer>().sharedMaterial;
+
+                previousLeft[z] = allowedTile;
+                previousBelow = allowedTile;
             }
         }
     }
@@ -258,7 +250,6 @@ public class BoardManager : MonoBehaviour
 
     public void ShiftBoard()
     {
-        LTSeq seq = LeanTween.sequence();
         for (int x = 0; x < xSize; x++)
         {
             AnimateColumn(x);
@@ -267,38 +258,47 @@ public class BoardManager : MonoBehaviour
 
     void AnimateColumn(int x)
     {
+        LTSeq seq = LeanTween.sequence();
         List<GameObject> currentChain = FindChain(x);
         int lowestChainPos = LowestGridPos(x, currentChain);
-        if (lowestChainPos == 0)
+        GameObject currentColumn = PoolGroup(currentChain, x, lowestChainPos);
+        int nextTilePos = NextTilePos(x, lowestChainPos);
+        if (lowestChainPos == nextTilePos || lowestChainPos == 0 || nextTilePos < 0)
         {
             return;
         }
-        GameObject currentColumn = PoolGroup(currentChain, x, lowestChainPos);
-        int nextTilePos = NextTilePos(x, lowestChainPos);
 
-        LeanTween.moveZ(currentColumn, grid[x, nextTilePos].transform.position.z, shiftSpeed).setEase(shitAnimCurve).setOnComplete(() =>
-                    {
-                        int distanceMoved = lowestChainPos - nextTilePos;
+        LeanTween.moveZ(currentColumn, grid[x, nextTilePos].transform.position.z, shiftSpeed * (lowestChainPos - nextTilePos)).setEase(shitAnimCurve).setOnComplete(() =>
+                      {
+                          seq.append(() =>
+                          {
 
-                        for (int z = 0; z < currentChain.Count; z++)
-                        {
+                              int distanceMoved = lowestChainPos - nextTilePos;
 
-                            int currentTilePos = lowestChainPos + z;
-                            int nextPos = lowestChainPos - distanceMoved + z;
+                              for (int z = 0; z < currentChain.Count; z++)
+                              {
 
-                            Tile currentTile = grid[x, currentTilePos].GetComponent<Tile>();
-                            Tile nextTile = grid[x, nextPos].GetComponent<Tile>();
+                                  int currentTilePos = lowestChainPos + z;
+                                  int nextPos = lowestChainPos - distanceMoved + z;
 
-                            GameObject tempPlatorm = currentTile.platform;
+                                  Tile currentTile = grid[x, currentTilePos].GetComponent<Tile>();
+                                  Tile nextTile = grid[x, nextPos].GetComponent<Tile>();
 
-                            currentTile.platform = nextTile.platform;
-                            nextTile.platform = tempPlatorm;
+                                  GameObject tempPlatorm = currentTile.platform;
 
-                            nextTile.UpdateTileInfo();
-                            currentTile.UpdateTileInfo();
+                                  currentTile.platform = nextTile.platform;
+                                  nextTile.platform = tempPlatorm;
 
-                        }
-                    });
+                                  nextTile.UpdateTileInfo();
+                                  currentTile.UpdateTileInfo();
+
+                              }
+                          });
+                          seq.append(() =>
+                          {
+                              AnimateColumn(x);
+                          });
+                      });
     }
 
     [SerializeField] List<Transform> tempListOfTiles = new List<Transform>();

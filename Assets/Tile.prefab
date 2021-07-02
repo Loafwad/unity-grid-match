@@ -26,13 +26,13 @@ RectTransform:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 4164789746445859541}
-  m_LocalRotation: {x: -0.7743987, y: -0, z: -0, w: -0.632698}
-  m_LocalPosition: {x: 0, y: 0, z: 3.4800014}
-  m_LocalScale: {x: 1.7741, y: 5.0170712, z: 3.4015472}
+  m_LocalRotation: {x: -0.8191521, y: 0, z: 0, w: -0.5735764}
+  m_LocalPosition: {x: 0, y: 0, z: 3.5}
+  m_LocalScale: {x: 1.5, y: 4, z: 1}
   m_Children: []
   m_Father: {fileID: 7073765092520487966}
   m_RootOrder: 0
-  m_LocalEulerAnglesHint: {x: -258.499, y: 0, z: 0}
+  m_LocalEulerAnglesHint: {x: -250, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
   m_AnchoredPosition: {x: 0, y: 0}
@@ -126,7 +126,7 @@ MonoBehaviour:
   m_faceColor:
     serializedVersion: 2
     rgba: 4294967295
-  m_fontSize: 8.4
+  m_fontSize: 8.5
   m_fontSizeBase: 36
   m_fontWeight: 400
   m_enableAutoSizing: 1
@@ -168,6 +168,7 @@ MonoBehaviour:
   m_hasFontAssetChanged: 0
   m_renderer: {fileID: 3733473517612153948}
   m_maskType: 0
+  _SortingLayer: 0
   _SortingLayerID: 0
   _SortingOrder: 0
 --- !u!225 &6232093925919172739
