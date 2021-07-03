@@ -376,7 +376,7 @@ MonoBehaviour:
   - {fileID: 7767526736648998531, guid: 50b987c1b193ee94882d90bf2446b729, type: 3}
   - {fileID: 4431933056309372495, guid: 62df7f6176a981d40bf2ba4bd6264a52, type: 3}
   prefabTile: {fileID: 6825236227529461375, guid: b39b645e25570974f86534dc2205245e, type: 3}
-  xSize: 7
+  xSize: 25
   zSize: 7
   shiftDirection: {x: 0, y: 1}
   shiftSpeed: 0.15

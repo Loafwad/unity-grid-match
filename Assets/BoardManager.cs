@@ -158,7 +158,7 @@ public class BoardManager : MonoBehaviour
 
     private int LowestGridPos(int column, List<GameObject> list)
     {
-        int lowest = xSize - 1;
+        int lowest = zSize - 1;
 
         foreach (GameObject tile in list)
         {
