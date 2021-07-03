@@ -56,7 +56,7 @@ public class BoardManager : MonoBehaviour
 
         for (int x = 0; x < xSize; x++)
         {
-            CreateGroup(FindChain(x), x);
+            CreateGroup(FindChain(x, false), x);
         }
 
         //InvokeRepeating("ShiftBoard", 0.5f, 0.5f);
@@ -83,13 +83,6 @@ public class BoardManager : MonoBehaviour
         }
     }
 
-    [SerializeField] List<GameObject> availableTiles = new List<GameObject>();
-
-    private void MakeTileAvailable(int x, int z)
-    {
-        availableTiles.Add(grid[x, z].GetComponent<Tile>().platform);
-    }
-
     public void RemoveRandomTiles()
     {
         for (int x = 0; x < xSize; x++)
@@ -99,7 +92,6 @@ public class BoardManager : MonoBehaviour
                 if (Random.value < 0.1f)
                 {
                     //grid[x, z].GetComponent<Tile>().platform.GetComponent<MeshRenderer>().enabled = false;
-                    MakeTileAvailable(x, z);
                     grid[x, z].GetComponent<Tile>().DisableTile();
                 }
             }
@@ -217,17 +209,18 @@ public class BoardManager : MonoBehaviour
         return columnObject;
     }
 
-    private List<GameObject> FindChain(int column)
+    private List<GameObject> FindChain(int column, bool filled)
     {
         List<GameObject> chain = new List<GameObject>();
         bool _firstTile = new bool();
+        filled = !filled;
         for (int z = zSize - 1; z >= 0; z--)
         {
             Tile tile = grid[column, z].GetComponent<Tile>();
 
-            if (tile.platformMesh == true)
+            if (tile.platformMesh == filled)
             {
-                _firstTile = true;
+                _firstTile = filled;
                 chain.Add(tile.platform);
             }
             else if (_firstTile)
@@ -259,25 +252,36 @@ public class BoardManager : MonoBehaviour
 
     public void ShiftBoard()
     {
-        for (int x = 0; x < xSize; x++)
+        LTSeq seq = LeanTween.sequence();
+        seq.append(() =>
         {
-            AnimateColumn(x);
-        }
+            for (int x = 0; x < xSize; x++)
+            {
+                AnimateColumn(x);
+            }
+        });
+
     }
 
     void AnimateColumn(int x)
     {
         LTSeq seq = LeanTween.sequence();
-        List<GameObject> currentChain = FindChain(x);
+        List<GameObject> currentChain = FindChain(x, false);
         int lowestChainPos = LowestGridPos(x, currentChain);
         GameObject currentColumn = PoolGroup(currentChain, x, lowestChainPos);
         int nextTilePos = NextTilePos(x, lowestChainPos);
-        if (lowestChainPos == nextTilePos || lowestChainPos == 0 || nextTilePos < 0)
+        if (lowestChainPos == nextTilePos)
         {
-            //introduce new tile.
-            //IntroduceNewTile();
+            IntroduceNewTile(FindChain(x, true).Count, x);
             return;
         }
+
+        if (lowestChainPos <= 0 || nextTilePos < 0)
+        {
+            //introduce new tile.
+            return;
+        }
+
 
         LeanTween.moveZ(currentColumn, grid[x, nextTilePos].transform.position.z, shiftSpeed * (lowestChainPos - nextTilePos)).setEase(shitAnimCurve).setOnComplete(() =>
                       {
@@ -302,11 +306,9 @@ public class BoardManager : MonoBehaviour
 
                                   nextTile.UpdateTileInfo();
                                   currentTile.UpdateTileInfo();
-
                               }
-                              IntroduceNewTile(distanceMoved, x);
-
                           });
+
                           seq.append(() =>
                           {
                               AnimateColumn(x);
@@ -314,26 +316,30 @@ public class BoardManager : MonoBehaviour
                       });
     }
 
+    [SerializeField] List<GameObject> newPos = new List<GameObject>();
     void IntroduceNewTile(int amount, int x)
     {
         //bug-note: does not currently replace a removed tile if,
         //the removed tile was at the top of the chain (column).
-        for (int i = 0; i < amount; i++)
+
+        for (int i = 1; i <= amount; i++)
         {
-            int _newZPos = zSize - (amount + i);
-            if (_newZPos >= xSize || _newZPos < 0)
+            int _newZPos = (xSize - 1) - amount + i;
+            if (_newZPos > zSize || _newZPos < 0)
             {
                 continue;
             }
-
             GameObject gridTile = grid[x, _newZPos];
             GameObject platform = gridTile.GetComponent<Tile>().platform;
 
-            platform.transform.position = new Vector3(gridTile.transform.position.x, 0, xSize + 20);
-            anim.IntroduceNewTile(platform, gridTile.transform.position);
-            platform.GetComponent<MeshRenderer>().enabled = true;
+            //platform.transform.position = gridTile.transform.position;
 
-            gridTile.GetComponent<Tile>().UpdateTileInfo();
+            anim.IntroduceNewTile(platform, gridTile.transform.position, zSize, i).append(() =>
+            {
+                platform.GetComponent<MeshRenderer>().enabled = true;
+                gridTile.GetComponent<Tile>().UpdateTileInfo();
+            });
+
         }
     }
 }

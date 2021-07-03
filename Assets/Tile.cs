@@ -5,8 +5,8 @@ using TMPro;
 
 public class Tile : MonoBehaviour
 {
-    private static Tile previousSelected = null;
-    private static Tile selected = null;
+    private Tile selected;
+    private static Tile previousSelected;
 
     private bool isSelected = false;
     public string color;
@@ -63,6 +63,22 @@ public class Tile : MonoBehaviour
         return mesh;
     }
 
+    public void SwitchPlatforms(GameObject objectA, GameObject objectB)
+    {
+        GameObject platformA = objectA.GetComponent<Tile>().platform;
+        GameObject platformB = objectB.GetComponent<Tile>().platform;
+
+        LeanTween.move(platformA, platformB.transform.position, animSwitchDuration).setEase(animSwitchCurve);
+        LeanTween.move(platformB, platformA.transform.position, animSwitchDuration).setEase(animSwitchCurve).setOnComplete(CheckMove);
+
+        GameObject tempPlatform = platformA;
+        platformA = platformB;
+        platformB = tempPlatform;
+
+        objectA.GetComponent<Tile>().UpdateTileInfo();
+        objectB.GetComponent<Tile>().UpdateTileInfo();
+    }
+
     TextMeshPro text;
 
     void Update()
@@ -82,15 +98,18 @@ public class Tile : MonoBehaviour
         }
     }
     #endregion
+
     private void Select()
     {
-
+        SelectPlayAnim(true);
     }
 
     private void Deselect()
     {
 
+        SelectPlayAnim(false);
     }
+
     void OnMouseDown()
     {
 
@@ -169,28 +188,17 @@ public class Tile : MonoBehaviour
 
     public void CheckMove()
     {
-        previousSelected.ClearAllMatches();
-        previousSelected.Deselect();
-        selected.Deselect();
-        selected.ClearAllMatches();
+        ClearAllMatches();
     }
 
     public void SwitchPosition()
     {
-        LeanTween.move(platform, previousSelected.transform.position, animSwitchDuration).setEase(animSwitchCurve);
-        LeanTween.move(previousSelected.platform, selected.transform.position, animSwitchDuration).setEase(animSwitchCurve).setOnComplete(CheckMove);
 
-        Tile tempSelected = selected;
-        selected = previousSelected;
-        previousSelected = tempSelected;
-
-        previousSelected.UpdateTileInfo();
-        selected.UpdateTileInfo();
     }
 
-    public void SelectPlayAnim(bool selected)
+    public void SelectPlayAnim(bool _selected)
     {
-        if (selected)
+        if (_selected)
         {
             anim.TileSelection(platform);
         }
@@ -201,11 +209,11 @@ public class Tile : MonoBehaviour
     }
     public void OnMouseEnter()
     {
-        anim.EnterHover(platform);
+        //anim.EnterHover(platform);
     }
     public void OnMouseExit()
     {
-        anim.ExitHover(platform);
+        //anim.ExitHover(platform);
     }
 }
 

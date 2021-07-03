@@ -37,9 +37,25 @@ public class GridAnimations : MonoBehaviour
 
     [Header("Introduce Tile")]
 
-    [SerializeField] private AnimationCurve introduceCurve;
-    [SerializeField] private float introduceTime;
+    [SerializeField] private AnimationCurve introduceCurveY;
+    [SerializeField] private float introduceTimeY;
+    [SerializeField] int introduceStartPosY;
 
+    [SerializeField] private AnimationCurve introduceCurveZ;
+    [SerializeField] private float introduceTimeZ;
+    [SerializeField] int introduceStartPosZ;
+
+    [SerializeField] private AnimationCurve introduceRotationCurve;
+    [SerializeField] float introduceRotationTime;
+    [SerializeField] float introduceDelay;
+
+
+    LTSeq seq;
+
+    void Start()
+    {
+        seq = LeanTween.sequence();
+    }
     public void TileLoad(GameObject platform, bool toggle)
     {
         platform.transform.position = new Vector3(platform.transform.position.x, 0, platform.transform.position.z);
@@ -51,14 +67,14 @@ public class GridAnimations : MonoBehaviour
     public void TileSelection(GameObject platform)
     {
         LeanTween.moveY(platform, 1, selectDurationTime).setEase(selectCurve);
-        LeanTween.rotate(platform, new Vector3(90, 0, 0), selectRotTime).setEase(selectRotCurve);
+        LeanTween.rotateAroundLocal(platform, new Vector3(1, 0, 0), 180, selectRotTime).setEase(selectRotCurve);
 
     }
 
     public void TileDeselection(GameObject platform)
     {
-        LeanTween.rotate(platform, new Vector3(90, 0, 0), deselectRotTime).setEase(deselectRotCurve);
         LeanTween.moveY(platform, new Vector3(0, 0, 0).y, deselectTime).setEase(deselectCurve);
+        LeanTween.rotateAroundLocal(platform, new Vector3(1, 0, 0), 180, selectRotTime).setEase(selectRotCurve);
 
     }
 
@@ -72,9 +88,20 @@ public class GridAnimations : MonoBehaviour
         LeanTween.moveY(platform, 0, hoverExitTime).setEase(hoverCurve);
     }
 
-    public void IntroduceNewTile(GameObject platform, Vector3 newPosition)
+    public LTSeq IntroduceNewTile(GameObject platform, Vector3 newPosition, int zSize, int i)
     {
-        LeanTween.move(platform, newPosition, introduceTime).setEase(introduceCurve);
-    }
+        seq.append(introduceDelay);
+        seq.append(() =>
+        {
+            platform.transform.position = new Vector3(newPosition.x, introduceStartPosY + newPosition.y, newPosition.z + introduceStartPosZ);
+            float distance = Vector3.Distance(platform.transform.position, newPosition);
 
+            float newRot = platform.transform.eulerAngles.z - (introduceStartPosY * distance);
+            LeanTween.rotateAroundLocal(platform, new Vector3(1, 0, 0), newRot, introduceRotationTime).setEase(introduceRotationCurve);
+
+            LeanTween.moveY(platform, newPosition.y, introduceTimeY).setEase(introduceCurveY);
+            LeanTween.moveZ(platform, newPosition.z, introduceTimeZ).setEase(introduceCurveZ);
+        });
+        return seq;
+    }
 }

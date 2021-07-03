@@ -376,10 +376,10 @@ MonoBehaviour:
   - {fileID: 7767526736648998531, guid: 50b987c1b193ee94882d90bf2446b729, type: 3}
   - {fileID: 4431933056309372495, guid: 62df7f6176a981d40bf2ba4bd6264a52, type: 3}
   prefabTile: {fileID: 6825236227529461375, guid: b39b645e25570974f86534dc2205245e, type: 3}
-  xSize: 5
-  zSize: 5
+  xSize: 7
+  zSize: 7
   shiftDirection: {x: 0, y: 1}
-  shiftSpeed: 0.1
+  shiftSpeed: 0.15
   shitAnimCurve:
     serializedVersion: 2
     m_Curve:
@@ -391,15 +391,15 @@ MonoBehaviour:
       tangentMode: 34
       weightedMode: 0
       inWeight: 0
-      outWeight: 0
+      outWeight: 0.33333334
     - serializedVersion: 3
       time: 1
       value: 1
-      inSlope: 1
-      outSlope: 1
-      tangentMode: 34
+      inSlope: -1.4000461
+      outSlope: -1.4000461
+      tangentMode: 0
       weightedMode: 0
-      inWeight: 0
+      inWeight: 0.069111526
       outWeight: 0
     m_PreInfinity: 2
     m_PostInfinity: 2
@@ -412,7 +412,7 @@ MonoBehaviour:
   enableClearSkip: 0
   listOfColumns: []
   enableText: 0
-  availableTiles: []
+  newPos: []
 --- !u!4 &685199452
 Transform:
   m_ObjectHideFlags: 0
@@ -909,7 +909,7 @@ RectTransform:
   m_Children:
   - {fileID: 1902122030}
   m_Father: {fileID: 0}
-  m_RootOrder: 6
+  m_RootOrder: 5
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
   m_AnchorMax: {x: 0, y: 0}
@@ -992,13 +992,13 @@ Transform:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 963194225}
-  m_LocalRotation: {x: 0.3139669, y: -0, z: -0, w: 0.949434}
-  m_LocalPosition: {x: 10.81, y: 20.04, z: -17.25}
+  m_LocalRotation: {x: 0.13052616, y: 0, z: 0, w: 0.9914449}
+  m_LocalPosition: {x: 7, y: 12, z: -15}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children: []
   m_Father: {fileID: 0}
   m_RootOrder: 0
-  m_LocalEulerAnglesHint: {x: 36.597, y: 0, z: 0}
+  m_LocalEulerAnglesHint: {x: 15, y: 0, z: 0}
 --- !u!1 &1071680930
 GameObject:
   m_ObjectHideFlags: 0
@@ -1195,7 +1195,7 @@ MonoBehaviour:
     m_RotationOrder: 4
   hoverEnterTime: 0
   hoverExitTime: 0.6
-  hoverHeight: 0.4
+  hoverHeight: 0.1
   loadRaiseCurve:
     serializedVersion: 2
     m_Curve:
@@ -1209,22 +1209,22 @@ MonoBehaviour:
       inWeight: 0
       outWeight: 0.29607242
     - serializedVersion: 3
-      time: 0.5
+      time: 0.496521
       value: 1
-      inSlope: 0
-      outSlope: 0
-      tangentMode: 34
+      inSlope: 0.5758701
+      outSlope: 0.5758701
+      tangentMode: 0
       weightedMode: 0
       inWeight: 0.33333334
-      outWeight: 0.33333334
+      outWeight: 0.1588443
     - serializedVersion: 3
       time: 1
       value: 0
-      inSlope: 0.16322538
-      outSlope: 0.16322538
+      inSlope: -4.3385143
+      outSlope: -4.3385143
       tangentMode: 0
       weightedMode: 0
-      inWeight: 0.37554157
+      inWeight: 0.11384523
       outWeight: 0
     m_PreInfinity: 2
     m_PostInfinity: 2
@@ -1275,7 +1275,7 @@ MonoBehaviour:
   loadFlipRotationTime: 1
   loadTileDelay: 0.1
   lrheight: 2
-  introduceCurve:
+  introduceCurveY:
     serializedVersion: 2
     m_Curve:
     - serializedVersion: 3
@@ -1290,6 +1290,76 @@ MonoBehaviour:
     - serializedVersion: 3
       time: 1
       value: 1
+      inSlope: -1.5311785
+      outSlope: -1.5311785
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0.088783205
+      outWeight: 0
+    m_PreInfinity: 2
+    m_PostInfinity: 2
+    m_RotationOrder: 4
+  introduceTimeY: 0.2
+  introduceStartPosY: 5
+  introduceCurveZ:
+    serializedVersion: 2
+    m_Curve:
+    - serializedVersion: 3
+      time: 0
+      value: 0
+      inSlope: 0
+      outSlope: 0
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0
+      outWeight: 0
+    - serializedVersion: 3
+      time: 0.5685839
+      value: 0.60223067
+      inSlope: 3.4298573
+      outSlope: 3.4298573
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0.33333334
+      outWeight: 0.120552875
+    - serializedVersion: 3
+      time: 1
+      value: 1
+      inSlope: -0.9244323
+      outSlope: -0.9244323
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0.14711961
+      outWeight: 0
+    m_PreInfinity: 2
+    m_PostInfinity: 2
+    m_RotationOrder: 4
+  introduceTimeZ: 0.4
+  introduceStartPosZ: 12
+  introduceRotationCurve:
+    serializedVersion: 2
+    m_Curve:
+    - serializedVersion: 3
+      time: 0
+      value: 0
+      inSlope: 0
+      outSlope: 0
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0
+      outWeight: 0
+    - serializedVersion: 3
+      time: 0.49583286
+      value: 0.98294085
+      inSlope: 0
+      outSlope: 0
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0.33333334
+      outWeight: 0.33333334
+    - serializedVersion: 3
+      time: 1
+      value: 0
       inSlope: 0
       outSlope: 0
       tangentMode: 0
@@ -1299,7 +1369,8 @@ MonoBehaviour:
     m_PreInfinity: 2
     m_PostInfinity: 2
     m_RotationOrder: 4
-  introduceTime: 0.2
+  introduceRotationTime: 0.2
+  introduceDelay: 0
 --- !u!1 &1437930592
 GameObject:
   m_ObjectHideFlags: 0
@@ -1792,63 +1863,6 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 2143438627}
   m_CullTransparentMesh: 1
---- !u!1001 &2376181264742247350
-PrefabInstance:
-  m_ObjectHideFlags: 0
-  serializedVersion: 2
-  m_Modification:
-    m_TransformParent: {fileID: 0}
-    m_Modifications:
-    - target: {fileID: 2376181265151612019, guid: f1b9b68c21adf94469dc09412a662ab2, type: 3}
-      propertyPath: m_Name
-      value: Cube
-      objectReference: {fileID: 0}
-    - target: {fileID: 2376181265151612031, guid: f1b9b68c21adf94469dc09412a662ab2, type: 3}
-      propertyPath: m_RootOrder
-      value: 5
-      objectReference: {fileID: 0}
-    - target: {fileID: 2376181265151612031, guid: f1b9b68c21adf94469dc09412a662ab2, type: 3}
-      propertyPath: m_LocalPosition.x
-      value: 1.0380666
-      objectReference: {fileID: 0}
-    - target: {fileID: 2376181265151612031, guid: f1b9b68c21adf94469dc09412a662ab2, type: 3}
-      propertyPath: m_LocalPosition.y
-      value: 6.368
-      objectReference: {fileID: 0}
-    - target: {fileID: 2376181265151612031, guid: f1b9b68c21adf94469dc09412a662ab2, type: 3}
-      propertyPath: m_LocalPosition.z
-      value: 2.431202
-      objectReference: {fileID: 0}
-    - target: {fileID: 2376181265151612031, guid: f1b9b68c21adf94469dc09412a662ab2, type: 3}
-      propertyPath: m_LocalRotation.w
-      value: 1
-      objectReference: {fileID: 0}
-    - target: {fileID: 2376181265151612031, guid: f1b9b68c21adf94469dc09412a662ab2, type: 3}
-      propertyPath: m_LocalRotation.x
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 2376181265151612031, guid: f1b9b68c21adf94469dc09412a662ab2, type: 3}
-      propertyPath: m_LocalRotation.y
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 2376181265151612031, guid: f1b9b68c21adf94469dc09412a662ab2, type: 3}
-      propertyPath: m_LocalRotation.z
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 2376181265151612031, guid: f1b9b68c21adf94469dc09412a662ab2, type: 3}
-      propertyPath: m_LocalEulerAnglesHint.x
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 2376181265151612031, guid: f1b9b68c21adf94469dc09412a662ab2, type: 3}
-      propertyPath: m_LocalEulerAnglesHint.y
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 2376181265151612031, guid: f1b9b68c21adf94469dc09412a662ab2, type: 3}
-      propertyPath: m_LocalEulerAnglesHint.z
-      value: 0
-      objectReference: {fileID: 0}
-    m_RemovedComponents: []
-  m_SourcePrefab: {fileID: 100100000, guid: f1b9b68c21adf94469dc09412a662ab2, type: 3}
 --- !u!1001 &5944530164943608792
 PrefabInstance:
   m_ObjectHideFlags: 0
