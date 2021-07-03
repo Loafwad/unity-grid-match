@@ -35,6 +35,11 @@ public class GridAnimations : MonoBehaviour
 
     [SerializeField] private int lrheight;
 
+    [Header("Introduce Tile")]
+
+    [SerializeField] private AnimationCurve introduceCurve;
+    [SerializeField] private float introduceTime;
+
     public void TileLoad(GameObject platform, bool toggle)
     {
         platform.transform.position = new Vector3(platform.transform.position.x, 0, platform.transform.position.z);
@@ -65,6 +70,11 @@ public class GridAnimations : MonoBehaviour
     public void ExitHover(GameObject platform)
     {
         LeanTween.moveY(platform, 0, hoverExitTime).setEase(hoverCurve);
+    }
+
+    public void IntroduceNewTile(GameObject platform, Vector3 newPosition)
+    {
+        LeanTween.move(platform, newPosition, introduceTime).setEase(introduceCurve);
     }
 
 }

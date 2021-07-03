@@ -5,6 +5,7 @@ using System.Collections.Generic;
 public class BoardManager : MonoBehaviour
 {
     public static BoardManager instance;
+    private GridAnimations anim;
     public List<GameObject> characters = new List<GameObject>();
     public GameObject prefabTile;
     public int xSize, zSize;
@@ -38,6 +39,8 @@ public class BoardManager : MonoBehaviour
     {
 
         instance = GetComponent<BoardManager>();
+        anim = GameObject.Find("BoardAnimator").GetComponent<GridAnimations>();
+
 
         LeanTween.init(5000);
 
@@ -59,11 +62,9 @@ public class BoardManager : MonoBehaviour
         //InvokeRepeating("ShiftBoard", 0.5f, 0.5f);
     }
 
-    private GridAnimations anim;
 
     public void FlipAllTiles()
     {
-        anim = GameObject.Find("BoardAnimator").GetComponent<GridAnimations>();
         List<Tile> listTile = new List<Tile>();
         reverse = !reverse;
         for (int x = 0; x < xSize; x++)
@@ -82,6 +83,13 @@ public class BoardManager : MonoBehaviour
         }
     }
 
+    [SerializeField] List<GameObject> availableTiles = new List<GameObject>();
+
+    private void MakeTileAvailable(int x, int z)
+    {
+        availableTiles.Add(grid[x, z].GetComponent<Tile>().platform);
+    }
+
     public void RemoveRandomTiles()
     {
         for (int x = 0; x < xSize; x++)
@@ -91,6 +99,7 @@ public class BoardManager : MonoBehaviour
                 if (Random.value < 0.1f)
                 {
                     //grid[x, z].GetComponent<Tile>().platform.GetComponent<MeshRenderer>().enabled = false;
+                    MakeTileAvailable(x, z);
                     grid[x, z].GetComponent<Tile>().DisableTile();
                 }
             }
@@ -265,6 +274,8 @@ public class BoardManager : MonoBehaviour
         int nextTilePos = NextTilePos(x, lowestChainPos);
         if (lowestChainPos == nextTilePos || lowestChainPos == 0 || nextTilePos < 0)
         {
+            //introduce new tile.
+            //IntroduceNewTile();
             return;
         }
 
@@ -293,11 +304,36 @@ public class BoardManager : MonoBehaviour
                                   currentTile.UpdateTileInfo();
 
                               }
+                              IntroduceNewTile(distanceMoved, x);
+
                           });
                           seq.append(() =>
                           {
                               AnimateColumn(x);
                           });
                       });
+    }
+
+    void IntroduceNewTile(int amount, int x)
+    {
+        //bug-note: does not currently replace a removed tile if,
+        //the removed tile was at the top of the chain (column).
+        for (int i = 0; i < amount; i++)
+        {
+            int _newZPos = zSize - (amount + i);
+            if (_newZPos >= xSize || _newZPos < 0)
+            {
+                continue;
+            }
+
+            GameObject gridTile = grid[x, _newZPos];
+            GameObject platform = gridTile.GetComponent<Tile>().platform;
+
+            platform.transform.position = new Vector3(gridTile.transform.position.x, 0, xSize + 20);
+            anim.IntroduceNewTile(platform, gridTile.transform.position);
+            platform.GetComponent<MeshRenderer>().enabled = true;
+
+            gridTile.GetComponent<Tile>().UpdateTileInfo();
+        }
     }
 }
