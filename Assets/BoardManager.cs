@@ -5,42 +5,36 @@ using System.Collections.Generic;
 public class BoardManager : MonoBehaviour
 {
     public static BoardManager instance;
-    private GridAnimations anim;
-    public List<GameObject> characters = new List<GameObject>();
-    public GameObject prefabTile;
     public int xSize, zSize;
+    [SerializeField] public List<GameObject> characters = new List<GameObject>();
+    [SerializeField] private GameObject prefabTile;
+    private GridAnimations anim;
 
     public GameObject[,] grid;
 
+    [Header("Board Shift Animations")]
     [SerializeField] private Vector2 shiftDirection;
     [SerializeField] private float shiftSpeed = 1f;
     [SerializeField] private AnimationCurve shitAnimCurve;
 
-    public List<GameObject> matchingTiles;
-    private bool toggle = false;
+
     [Header("Board Appearance")]
     [SerializeField] private Vector2 offset = new Vector2(0.1f, 0.1f);
     [SerializeField] private bool inheritPrefabOffset = false;
-
-    [Header("Delay Adjustment")]
-
-    [SerializeField] float TileShuffleDelay = 0.5f;
-    [SerializeField] float TileClearDelay = 0.5f;
+    private Vector3 addativeOffset;
 
     [Header("Debug Tools")]
 
     [SerializeField] private bool enableClearSkip = false;
-    private Vector3 addativeOffset;
-
     [SerializeField] private List<GameObject> listOfColumns;
 
+    public List<GameObject> matchingTiles;
     public bool enableText;
     private void Start()
     {
 
         instance = GetComponent<BoardManager>();
         anim = GameObject.Find("BoardAnimator").GetComponent<GridAnimations>();
-
 
         LeanTween.init(5000);
 
@@ -58,8 +52,6 @@ public class BoardManager : MonoBehaviour
         {
             CreateGroup(FindChain(x, false), x);
         }
-
-        //InvokeRepeating("ShiftBoard", 0.5f, 0.5f);
     }
 
 
@@ -91,25 +83,11 @@ public class BoardManager : MonoBehaviour
             {
                 if (Random.value < 0.1f)
                 {
-                    //grid[x, z].GetComponent<Tile>().platform.GetComponent<MeshRenderer>().enabled = false;
                     grid[x, z].GetComponent<Tile>().DisableTile();
                 }
             }
         }
         ShiftBoard();
-    }
-
-    public void ToggleShiftDirection()
-    {
-        toggle = !toggle;
-        if (toggle)
-        {
-            shiftDirection = new Vector2(0, 1);
-        }
-        else
-        {
-            shiftDirection = new Vector2(0, -1);
-        }
     }
 
     private void CreateBoard(float xOffset, float zOffset)
@@ -260,10 +238,9 @@ public class BoardManager : MonoBehaviour
                 AnimateColumn(x);
             }
         });
-
     }
 
-    void AnimateColumn(int x)
+    private void AnimateColumn(int x)
     {
         LTSeq seq = LeanTween.sequence();
         List<GameObject> currentChain = FindChain(x, false);
@@ -278,16 +255,13 @@ public class BoardManager : MonoBehaviour
 
         if (lowestChainPos <= 0 || nextTilePos < 0)
         {
-            //introduce new tile.
             return;
         }
-
 
         LeanTween.moveZ(currentColumn, grid[x, nextTilePos].transform.position.z, shiftSpeed * (lowestChainPos - nextTilePos)).setEase(shitAnimCurve).setOnComplete(() =>
                       {
                           seq.append(() =>
                           {
-
                               int distanceMoved = lowestChainPos - nextTilePos;
 
                               for (int z = 0; z < currentChain.Count; z++)
@@ -308,7 +282,6 @@ public class BoardManager : MonoBehaviour
                                   currentTile.UpdateTileInfo();
                               }
                           });
-
                           seq.append(() =>
                           {
                               AnimateColumn(x);
@@ -316,12 +289,8 @@ public class BoardManager : MonoBehaviour
                       });
     }
 
-    [SerializeField] List<GameObject> newPos = new List<GameObject>();
     void IntroduceNewTile(int amount, int x)
     {
-        //bug-note: does not currently replace a removed tile if,
-        //the removed tile was at the top of the chain (column).
-
         for (int i = 1; i <= amount; i++)
         {
             int _newZPos = (xSize - 1) - amount + i;
@@ -332,14 +301,11 @@ public class BoardManager : MonoBehaviour
             GameObject gridTile = grid[x, _newZPos];
             GameObject platform = gridTile.GetComponent<Tile>().platform;
 
-            //platform.transform.position = gridTile.transform.position;
-
             anim.IntroduceNewTile(platform, gridTile.transform.position, zSize, i).append(() =>
             {
                 platform.GetComponent<MeshRenderer>().enabled = true;
                 gridTile.GetComponent<Tile>().UpdateTileInfo();
             });
-
         }
     }
 }

@@ -5,12 +5,12 @@ using TMPro;
 
 public class Tile : MonoBehaviour
 {
-    private Tile selected;
+    private BoardManager board = BoardManager.instance;
+    private static Tile selected;
     private static Tile previousSelected;
 
     private bool isSelected = false;
     public string color;
-    BoardManager board = BoardManager.instance;
     private GridAnimations anim;
     [SerializeField] public GameObject platform;
 
@@ -112,7 +112,7 @@ public class Tile : MonoBehaviour
 
     void OnMouseDown()
     {
-
+        Select();
     }
 
     void FloodFill(int x, int z)
