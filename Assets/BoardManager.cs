@@ -178,7 +178,18 @@ public class BoardManager : MonoBehaviour
         //major performance issue!!
         //note: deatching all children shouldn't be necessary as some objects in the list of chains should already be parented to the columnObject. They just need to be reorganized by possibly using SetSiblingIndex and only parenting the objects of child if they are not already parented to it.
 
+        //note-2: even doing this method is causing considerable performance issues.
+        //so a different approach might be necessary.
+
         GameObject columnObject = listOfColumns[x];
+        for (int i = 0; i < columnObject.transform.childCount; i++)
+        {
+            if (!chain.Contains(columnObject.transform.GetChild(i).gameObject))
+            {
+                columnObject.transform.GetChild(i).parent = null;
+            }
+        }
+
 
         columnObject.transform.DetachChildren();
 
@@ -250,9 +261,7 @@ public class BoardManager : MonoBehaviour
         int lowestChainPos = LowestGridPos(x, currentChain);
         int nextTilePos = NextTilePos(x, lowestChainPos);
 
-        int distanceMoved = lowestChainPos - nextTilePos;
-
-        if (lowestChainPos == nextTilePos || distanceMoved == 0)
+        if (lowestChainPos == nextTilePos)
         {
             IntroduceNewTile(FindChain(x, true).Count, x);
             return;
@@ -267,7 +276,7 @@ public class BoardManager : MonoBehaviour
 
         LeanTween.moveZ(currentColumn, grid[x, nextTilePos].transform.position.z, shiftSpeed * (lowestChainPos - nextTilePos)).setEase(shitAnimCurve).setOnComplete(() =>
                       {
-
+                          int distanceMoved = lowestChainPos - nextTilePos;
 
                           seq.append(() =>
                           {
