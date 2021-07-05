@@ -230,14 +230,10 @@ public class BoardManager : MonoBehaviour
 
     public void ShiftBoard()
     {
-        LTSeq seq = LeanTween.sequence();
-        seq.append(() =>
+        for (int x = 0; x < xSize; x++)
         {
-            for (int x = 0; x < xSize; x++)
-            {
-                AnimateColumn(x);
-            }
-        });
+            AnimateColumn(x);
+        }
     }
 
     private void AnimateColumn(int x)
