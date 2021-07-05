@@ -1,22 +1,22 @@
-﻿using UnityEngine;
 using System.Collections;
 using System.Collections.Generic;
+using UnityEngine;
 using TMPro;
 
+[System.Serializable]
 public class Tile : MonoBehaviour
 {
     private BoardManager board = BoardManager.instance;
-    private static Tile selected;
-    private static Tile previousSelected;
-
-    private bool isSelected = false;
-    public string color;
     private GridAnimations anim;
-    [SerializeField] public GameObject platform;
+
+    public static Tile CurrentSelected;
+    public static Tile PreviousSelected;
 
     [Header("Switch Tile Animation")]
     public AnimationCurve animSwitchCurve;
     public float animSwitchDuration = 1f;
+    [SerializeField] private string color;
+    [SerializeField] public GameObject platform;
 
     [Header("Position Info")]
     [SerializeField] public Vector2 objectGridPosition;
@@ -30,8 +30,14 @@ public class Tile : MonoBehaviour
     [SerializeField]
     private List<GameObject> _adjacentTiles;
     MeshRenderer mesh;
+    TextMeshPro text;
+
+    [SerializeField] GameObject tempTestPlatA;
+    [SerializeField] GameObject tempTestPlatB;
+
 
     #region Awake/Start/Update
+
     void Awake()
     {
         anim = GameObject.Find("BoardAnimator").GetComponent<GridAnimations>();
@@ -44,7 +50,28 @@ public class Tile : MonoBehaviour
         int z = (int)board.GridPosFromWorldPos(this.transform.position).z;
         objectPosition = new Vector3(transform.position.x, 0, transform.position.z);
     }
-
+    void Update()
+    {
+        if (CurrentSelected != null)
+        {
+            tempTestPlatA = CurrentSelected.gameObject;
+        }
+        if (PreviousSelected != null)
+        {
+            tempTestPlatB = PreviousSelected.gameObject;
+        }
+        if (!platformMesh || !board.enableText)
+        {
+            text.enabled = false;
+        }
+        else
+        {
+            int zPos = board.GridPosFromWorldPos(platform.transform.position).z;
+            text.SetText(zPos.ToString());
+            text.enabled = true;
+        }
+    }
+    #endregion
     public void DisableTile()
     {
         mesh.enabled = false;
@@ -58,8 +85,6 @@ public class Tile : MonoBehaviour
         platformMesh = mesh.enabled;
         text = platform.GetComponentInChildren<TextMeshPro>();
 
-        //Debug.Log("UPDATED MESH!");
-
         return mesh;
     }
 
@@ -69,7 +94,7 @@ public class Tile : MonoBehaviour
         GameObject platformB = objectB.GetComponent<Tile>().platform;
 
         LeanTween.move(platformA, platformB.transform.position, animSwitchDuration).setEase(animSwitchCurve);
-        LeanTween.move(platformB, platformA.transform.position, animSwitchDuration).setEase(animSwitchCurve).setOnComplete(CheckMove);
+        LeanTween.move(platformB, platformA.transform.position, animSwitchDuration).setEase(animSwitchCurve);
 
         GameObject tempPlatform = platformA;
         platformA = platformB;
@@ -78,43 +103,6 @@ public class Tile : MonoBehaviour
         objectA.GetComponent<Tile>().UpdateTileInfo();
         objectB.GetComponent<Tile>().UpdateTileInfo();
     }
-
-    TextMeshPro text;
-
-    void Update()
-    {
-
-        //UpdateMesh();
-
-        if (!platformMesh || !board.enableText)
-        {
-            text.enabled = false;
-        }
-        else
-        {
-            int zPos = board.GridPosFromWorldPos(platform.transform.position).z;
-            text.SetText(zPos.ToString());
-            text.enabled = true;
-        }
-    }
-    #endregion
-
-    private void Select()
-    {
-        SelectPlayAnim(true);
-    }
-
-    private void Deselect()
-    {
-
-        SelectPlayAnim(false);
-    }
-
-    void OnMouseDown()
-    {
-        Select();
-    }
-
     void FloodFill(int x, int z)
     {
         if (x >= 0 && x < board.xSize && z >= 0 && z < board.zSize)
@@ -186,36 +174,22 @@ public class Tile : MonoBehaviour
         }
     }
 
-    public void CheckMove()
-    {
-        ClearAllMatches();
-    }
-
-    public void SwitchPosition()
+    void OnMouseDown()
     {
 
     }
 
-    public void SelectPlayAnim(bool _selected)
+    void Select()
     {
-        if (_selected)
-        {
-            anim.TileSelection(platform);
-        }
-        else
-        {
-            anim.TileDeselection(platform);
-        }
+        CurrentSelected = this;
+        PreviousSelected = this;
+        anim.TileSelection(platform);
     }
-    public void OnMouseEnter()
+
+    void Deselect()
     {
-        //anim.EnterHover(platform);
-    }
-    public void OnMouseExit()
-    {
-        //anim.ExitHover(platform);
+        CurrentSelected = null;
+        PreviousSelected = null;
+        anim.TileDeselection(platform);
     }
 }
-
-
-

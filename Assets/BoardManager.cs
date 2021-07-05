@@ -245,13 +245,15 @@ public class BoardManager : MonoBehaviour
         LTSeq seq = LeanTween.sequence();
         List<GameObject> currentChain = FindChain(x, false);
         int lowestChainPos = LowestGridPos(x, currentChain);
-        GameObject currentColumn = PoolGroup(currentChain, x, lowestChainPos);
         int nextTilePos = NextTilePos(x, lowestChainPos);
+
         if (lowestChainPos == nextTilePos)
         {
             IntroduceNewTile(FindChain(x, true).Count, x);
             return;
         }
+
+        GameObject currentColumn = PoolGroup(currentChain, x, lowestChainPos);
 
         if (lowestChainPos <= 0 || nextTilePos < 0)
         {
@@ -260,10 +262,11 @@ public class BoardManager : MonoBehaviour
 
         LeanTween.moveZ(currentColumn, grid[x, nextTilePos].transform.position.z, shiftSpeed * (lowestChainPos - nextTilePos)).setEase(shitAnimCurve).setOnComplete(() =>
                       {
+
+                          int distanceMoved = lowestChainPos - nextTilePos;
+
                           seq.append(() =>
                           {
-                              int distanceMoved = lowestChainPos - nextTilePos;
-
                               for (int z = 0; z < currentChain.Count; z++)
                               {
 
@@ -293,7 +296,7 @@ public class BoardManager : MonoBehaviour
     {
         for (int i = 1; i <= amount; i++)
         {
-            int _newZPos = (xSize - 1) - amount + i;
+            int _newZPos = (zSize - 1) - amount + i;
             if (_newZPos > zSize || _newZPos < 0)
             {
                 continue;
@@ -301,7 +304,7 @@ public class BoardManager : MonoBehaviour
             GameObject gridTile = grid[x, _newZPos];
             GameObject platform = gridTile.GetComponent<Tile>().platform;
 
-            anim.IntroduceNewTile(platform, gridTile.transform.position, zSize, i).append(() =>
+            anim.IntroduceNewTile(platform, gridTile.transform.position, zSize).append(() =>
             {
                 platform.GetComponent<MeshRenderer>().enabled = true;
                 gridTile.GetComponent<Tile>().UpdateTileInfo();
