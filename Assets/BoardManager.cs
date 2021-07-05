@@ -81,7 +81,7 @@ public class BoardManager : MonoBehaviour
         {
             for (int z = 0; z < zSize; z++)
             {
-                if (Random.value < 0.1f)
+                if (Random.value < 0.5f)
                 {
                     grid[x, z].GetComponent<Tile>().DisableTile();
                 }
@@ -124,6 +124,10 @@ public class BoardManager : MonoBehaviour
 
                 possibleCharacters.Remove(previousLeft[z]);
                 possibleCharacters.Remove(previousBelow);
+
+                //Performance-note:
+                //Performance and load times could be improved if we used a single material and/or colors and
+                //a single object where we just swap the color or materials.
 
                 GameObject allowedTile = possibleCharacters[Random.Range(0, possibleCharacters.Count)];
                 gridTile.transform.GetChild(0).GetComponent<MeshRenderer>().sharedMaterial = allowedTile.GetComponent<MeshRenderer>().sharedMaterial;
@@ -213,6 +217,8 @@ public class BoardManager : MonoBehaviour
 
     private int NextTilePos(int column, int currentPos)
     {
+        //Performance OR Code cleanliness could potentially be improved by combining NexTilePos & FindChain
+        //or reducing FindChains complexity in finding empty tiles.
         for (int z = currentPos; z >= 0; z--)
         {
             bool platformMesh = grid[column, z].GetComponent<Tile>().platformMesh;
