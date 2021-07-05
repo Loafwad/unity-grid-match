@@ -278,30 +278,24 @@ public class BoardManager : MonoBehaviour
                       {
                           int distanceMoved = lowestChainPos - nextTilePos;
 
-                          seq.append(() =>
+                          for (int z = 0; z < currentChain.Count; z++)
                           {
-                              for (int z = 0; z < currentChain.Count; z++)
-                              {
 
-                                  int currentTilePos = lowestChainPos + z;
-                                  int nextPos = lowestChainPos - distanceMoved + z;
+                              int currentTilePos = lowestChainPos + z;
+                              int nextPos = lowestChainPos - distanceMoved + z;
 
-                                  Tile currentTile = grid[x, currentTilePos].GetComponent<Tile>();
-                                  Tile nextTile = grid[x, nextPos].GetComponent<Tile>();
+                              Tile currentTile = grid[x, currentTilePos].GetComponent<Tile>();
+                              Tile nextTile = grid[x, nextPos].GetComponent<Tile>();
 
-                                  GameObject tempPlatorm = currentTile.platform;
+                              GameObject tempPlatorm = currentTile.platform;
 
-                                  currentTile.platform = nextTile.platform;
-                                  nextTile.platform = tempPlatorm;
+                              currentTile.platform = nextTile.platform;
+                              nextTile.platform = tempPlatorm;
 
-                                  nextTile.UpdateTileInfo();
-                                  currentTile.UpdateTileInfo();
-                              }
-                          });
-                          seq.append(() =>
-                          {
-                              AnimateColumn(x);
-                          });
+                              nextTile.UpdateTileInfo();
+                              currentTile.UpdateTileInfo();
+                          }
+                          AnimateColumn(x);
                       });
     }
 

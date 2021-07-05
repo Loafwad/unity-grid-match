@@ -411,43 +411,34 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   xSize: 15
-  zSize: 5
+  zSize: 15
   characters:
   - {fileID: 4431933056309372495, guid: 348ec3087fd0f79438393f0088f65523, type: 3}
   - {fileID: 4431933056309372495, guid: 7c53d4928afb610419ca47405f252735, type: 3}
   - {fileID: 7767526736648998531, guid: 50b987c1b193ee94882d90bf2446b729, type: 3}
   prefabTile: {fileID: 6825236227529461375, guid: b39b645e25570974f86534dc2205245e, type: 3}
   shiftDirection: {x: 0, y: 1}
-  shiftSpeed: 0.15
+  shiftSpeed: 0.05
   shitAnimCurve:
     serializedVersion: 2
     m_Curve:
     - serializedVersion: 3
-      time: 0.0016937256
-      value: -0.0033874512
-      inSlope: 2.6793308
-      outSlope: 2.6793308
-      tangentMode: 0
+      time: 0
+      value: 0
+      inSlope: 1
+      outSlope: 1
+      tangentMode: 34
       weightedMode: 0
       inWeight: 0
-      outWeight: 0.0809229
+      outWeight: 0
     - serializedVersion: 3
-      time: 0.5026816
-      value: 0.9214199
-      inSlope: 1.1860694
-      outSlope: 1.1860694
-      tangentMode: 0
-      weightedMode: 0
-      inWeight: 0.33333334
-      outWeight: 0.33333334
-    - serializedVersion: 3
-      time: 1.0028076
+      time: 1
       value: 1
-      inSlope: -0.60545135
-      outSlope: -0.60545135
-      tangentMode: 0
+      inSlope: 1
+      outSlope: 1
+      tangentMode: 34
       weightedMode: 0
-      inWeight: 0.15482935
+      inWeight: 0
       outWeight: 0
     m_PreInfinity: 2
     m_PostInfinity: 2
