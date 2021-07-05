@@ -81,7 +81,7 @@ public class BoardManager : MonoBehaviour
         {
             for (int z = 0; z < zSize; z++)
             {
-                if (Random.value < 0.5f)
+                if (Random.value < 0.2f)
                 {
                     grid[x, z].GetComponent<Tile>().DisableTile();
                 }
@@ -179,6 +179,7 @@ public class BoardManager : MonoBehaviour
         //note: deatching all children shouldn't be necessary as some objects in the list of chains should already be parented to the columnObject. They just need to be reorganized by possibly using SetSiblingIndex and only parenting the objects of child if they are not already parented to it.
 
         GameObject columnObject = listOfColumns[x];
+
         columnObject.transform.DetachChildren();
 
         columnObject.transform.position = grid[x, columnPos].transform.position;
@@ -249,7 +250,9 @@ public class BoardManager : MonoBehaviour
         int lowestChainPos = LowestGridPos(x, currentChain);
         int nextTilePos = NextTilePos(x, lowestChainPos);
 
-        if (lowestChainPos == nextTilePos)
+        int distanceMoved = lowestChainPos - nextTilePos;
+
+        if (lowestChainPos == nextTilePos || distanceMoved == 0)
         {
             IntroduceNewTile(FindChain(x, true).Count, x);
             return;
@@ -265,7 +268,6 @@ public class BoardManager : MonoBehaviour
         LeanTween.moveZ(currentColumn, grid[x, nextTilePos].transform.position.z, shiftSpeed * (lowestChainPos - nextTilePos)).setEase(shitAnimCurve).setOnComplete(() =>
                       {
 
-                          int distanceMoved = lowestChainPos - nextTilePos;
 
                           seq.append(() =>
                           {

@@ -174,11 +174,6 @@ public class Tile : MonoBehaviour
         }
     }
 
-    void OnMouseDown()
-    {
-
-    }
-
     void Select()
     {
         CurrentSelected = this;

@@ -88,13 +88,10 @@ public class GridAnimations : MonoBehaviour
 
     public LTSeq IntroduceNewTile(GameObject platform, Vector3 newPosition, int zSize)
     {
-        seq.append(() =>
-        {
-            platform.transform.position = new Vector3(newPosition.x, introduceStartPosY + newPosition.y, newPosition.z + introduceStartPosZ);
-        });
         seq.append(introduceDelay);
         seq.append(() =>
         {
+            platform.transform.position = new Vector3(newPosition.x, introduceStartPosY + newPosition.y, newPosition.z + introduceStartPosZ);
 
             float distance = Vector3.Distance(platform.transform.position, newPosition);
             float newRot = platform.transform.eulerAngles.z - (introduceStartPosY * distance);
@@ -103,8 +100,8 @@ public class GridAnimations : MonoBehaviour
 
             LeanTween.moveY(platform, newPosition.y, introduceTimeY).setEase(introduceCurveY);
             LeanTween.moveZ(platform, newPosition.z, introduceTimeZ).setEase(introduceCurveZ);
-
         });
+
         return seq;
     }
 }
