@@ -1,6 +1,7 @@
 using UnityEngine;
 using System.Collections;
 using System.Collections.Generic;
+using System.Threading;
 
 public class BoardManager : MonoBehaviour
 {
@@ -30,13 +31,17 @@ public class BoardManager : MonoBehaviour
 
     public List<GameObject> matchingTiles;
     public bool enableText;
+
+    private void Awake()
+    {
+        LeanTween.init(5000);
+    }
     private void Start()
     {
 
         instance = GetComponent<BoardManager>();
         anim = GameObject.Find("BoardAnimator").GetComponent<GridAnimations>();
 
-        LeanTween.init(5000);
 
         MeshRenderer prefabTileMesh = prefabTile.GetComponent<MeshRenderer>();
         Vector2 prefabOffset = new Vector2(prefabTileMesh.bounds.size.x, prefabTileMesh.bounds.size.z);
@@ -81,7 +86,7 @@ public class BoardManager : MonoBehaviour
         {
             for (int z = 0; z < zSize; z++)
             {
-                if (Random.value < 0.2f)
+                if (Random.value < 0.5f)
                 {
                     grid[x, z].GetComponent<Tile>().DisableTile();
                 }
@@ -252,7 +257,7 @@ public class BoardManager : MonoBehaviour
 
         if (lowestChainPos == nextTilePos)
         {
-            IntroduceNewTile(FindChain(x, true).Count, x);
+            StartCoroutine(IntroduceNewTile(FindChain(x, true).Count, x));
             return;
         }
 
@@ -284,12 +289,14 @@ public class BoardManager : MonoBehaviour
                               nextTile.UpdateTileInfo();
                               currentTile.UpdateTileInfo();
                           }
+                          seq.reset();
                           AnimateColumn(x);
                       });
     }
 
-    void IntroduceNewTile(int amount, int x)
+    private IEnumerator IntroduceNewTile(int amount, int x)
     {
+        WaitForSeconds wait = new WaitForSeconds(0.1f);
         for (int i = 1; i <= amount; i++)
         {
             int _newZPos = (zSize - 1) - amount + i;
@@ -300,11 +307,10 @@ public class BoardManager : MonoBehaviour
             GameObject gridTile = grid[x, _newZPos];
             GameObject platform = gridTile.GetComponent<Tile>().platform;
 
-            anim.IntroduceNewTile(platform, gridTile.transform.position, zSize).append(() =>
-            {
-                platform.GetComponent<MeshRenderer>().enabled = true;
-                gridTile.GetComponent<Tile>().UpdateTileInfo();
-            });
+            anim.IntroduceNewTile(platform, gridTile.transform.position, zSize);
+            platform.GetComponent<MeshRenderer>().enabled = true;
+            gridTile.GetComponent<Tile>().UpdateTileInfo();
+            yield return wait;
         }
     }
 }
