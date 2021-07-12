@@ -13,6 +13,9 @@ public class BoardManager : MonoBehaviour
     public GameObject[,] grid;
 
     [Header("Board Shift Animations")]
+    [SerializeField] private float introduceNewTileTime;
+
+    [Header("Board Shift Animations")]
     [SerializeField] private Vector2 shiftDirection;
     [SerializeField] private float shiftSpeed = 1f;
     [SerializeField] private AnimationCurve shitAnimCurve;
@@ -27,6 +30,9 @@ public class BoardManager : MonoBehaviour
 
     [SerializeField] private bool enableClearSkip = false;
     [SerializeField] private List<GameObject> listOfColumns;
+
+    [Range(0f, 1f)]
+    [SerializeField] private float rndRemoveAmount;
 
     public List<GameObject> matchingTiles;
     public bool enableText;
@@ -85,7 +91,7 @@ public class BoardManager : MonoBehaviour
         {
             for (int z = 0; z < zSize; z++)
             {
-                if (Random.value < 0.5f)
+                if (Random.value < rndRemoveAmount)
                 {
                     grid[x, z].GetComponent<Tile>().DisableTile();
                 }
@@ -187,12 +193,10 @@ public class BoardManager : MonoBehaviour
         columnObject.transform.DetachChildren();
 
         columnObject.transform.position = grid[x, columnPos].transform.position;
-
         for (int j = 0; j < chain.Count; j++)
         {
-            chain[j].transform.SetParent(columnObject.transform, true);
+            chain[j].transform.SetParent(columnObject.transform);
         }
-
         return columnObject;
     }
 
@@ -249,7 +253,6 @@ public class BoardManager : MonoBehaviour
 
     private void AnimateColumn(int x)
     {
-        LTSeq seq = LeanTween.sequence();
         List<GameObject> currentChain = FindChain(x, false);
         int lowestChainPos = LowestGridPos(x, currentChain);
         int nextTilePos = NextTilePos(x, lowestChainPos);
@@ -259,9 +262,7 @@ public class BoardManager : MonoBehaviour
             StartCoroutine(IntroduceNewTile(FindChain(x, true).Count, x));
             return;
         }
-
         GameObject currentColumn = PoolGroup(currentChain, x, lowestChainPos);
-
         if (lowestChainPos <= 0 || nextTilePos < 0)
         {
             return;
@@ -288,14 +289,13 @@ public class BoardManager : MonoBehaviour
                               nextTile.UpdateTileInfo();
                               currentTile.UpdateTileInfo();
                           }
-                          seq.reset();
                           AnimateColumn(x);
                       });
     }
 
     private IEnumerator IntroduceNewTile(int amount, int x)
     {
-        WaitForSeconds wait = new WaitForSeconds(0.1f);
+        WaitForSeconds wait = new WaitForSeconds(introduceNewTileTime);
         for (int i = 1; i <= amount; i++)
         {
             int _newZPos = (zSize - 1) - amount + i;
