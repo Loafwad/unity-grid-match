@@ -150,18 +150,18 @@ public class BoardManager : MonoBehaviour
 
     private int LowestGridPos(int column, List<GameObject> list)
     {
-        int lowest = zSize - 1;
+        int _lowest = zSize - 1;
 
         foreach (GameObject tile in list)
         {
-            int tilePos = (int)GridPosFromWorldPos(tile.transform.position).z;
+            int _tilePos = (int)GridPosFromWorldPos(tile.transform.position).z;
 
-            if (tilePos <= lowest)
+            if (_tilePos <= _lowest)
             {
-                lowest = tilePos;
+                _lowest = _tilePos;
             }
         }
-        return lowest;
+        return _lowest;
     }
 
     public (int x, int z) GridPosFromWorldPos(Vector3 worldPos)
@@ -188,22 +188,22 @@ public class BoardManager : MonoBehaviour
         //major performance issue!!
         //note: deatching all children shouldn't be necessary as some objects in the list of chains should already be parented to the columnObject. They just need to be reorganized by possibly using SetSiblingIndex and only parenting the objects of child if they are not already parented to it.
 
-        Transform columnObject = listOfColumns[x].gameObject.transform;
-        columnObject.transform.DetachChildren();
+        Transform _columnObject = listOfColumns[x].gameObject.transform;
+        _columnObject.transform.DetachChildren();
 
         //technically not needed, but the column still moves.
-        columnObject.position = grid[x, columnPos].transform.position;
+        _columnObject.position = grid[x, columnPos].transform.position;
 
         for (int j = 0; j < chain.Count; j++)
         {
-            Transform newChild = chain[j].transform;
-            if (newChild.parent == columnObject)
+            Transform _newChild = chain[j].transform;
+            if (_newChild.parent == _columnObject)
             {
                 continue;
             }
-            newChild.SetParent(columnObject, true);
+            _newChild.SetParent(_columnObject, true);
         }
-        return columnObject.gameObject;
+        return _columnObject.gameObject;
     }
 
     private List<GameObject> FindChain(int column, bool filled)
