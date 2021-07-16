@@ -202,8 +202,6 @@ public class BoardManager : MonoBehaviour
                 continue;
             }
             newChild.SetParent(columnObject, true);
-            //newChild.SetAsFirstSibling();
-            //newChild.SetAsLastSibling();
         }
         return columnObject.gameObject;
     }
