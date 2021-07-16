@@ -410,8 +410,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 061b3d3bea9cc824ba58dca6eececc99, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  xSize: 7
-  zSize: 7
+  xSize: 25
+  zSize: 25
   characters:
   - {fileID: 4431933056309372495, guid: 348ec3087fd0f79438393f0088f65523, type: 3}
   - {fileID: 4431933056309372495, guid: 7c53d4928afb610419ca47405f252735, type: 3}
@@ -419,7 +419,7 @@ MonoBehaviour:
   prefabTile: {fileID: 6825236227529461375, guid: b39b645e25570974f86534dc2205245e, type: 3}
   introduceNewTileTime: 0.05
   shiftDirection: {x: 0, y: 1}
-  shiftSpeed: 0.1
+  shiftSpeed: 0.05
   shitAnimCurve:
     serializedVersion: 2
     m_Curve:
