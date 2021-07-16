@@ -175,7 +175,7 @@ public class BoardManager : MonoBehaviour
     private List<GameObject> CreateGroup(List<GameObject> chain, int x)
     {
         GameObject columnObject = new GameObject();
-        columnObject.transform.parent = this.transform;
+        //columnObject.transform.parent = this.transform;
         columnObject.transform.position = grid[x, LowestGridPos(x, chain)].transform.position;
         columnObject.transform.name = "ColumnObject: " + x;
         listOfColumns.Add(columnObject);
@@ -188,16 +188,24 @@ public class BoardManager : MonoBehaviour
         //major performance issue!!
         //note: deatching all children shouldn't be necessary as some objects in the list of chains should already be parented to the columnObject. They just need to be reorganized by possibly using SetSiblingIndex and only parenting the objects of child if they are not already parented to it.
 
-        GameObject columnObject = listOfColumns[x].gameObject;
-
+        Transform columnObject = listOfColumns[x].gameObject.transform;
         columnObject.transform.DetachChildren();
 
-        columnObject.transform.position = grid[x, columnPos].transform.position;
+        //technically not needed, but the column still moves.
+        columnObject.position = grid[x, columnPos].transform.position;
+
         for (int j = 0; j < chain.Count; j++)
         {
-            chain[j].transform.SetParent(columnObject.transform);
+            Transform newChild = chain[j].transform;
+            if (newChild.parent == columnObject)
+            {
+                continue;
+            }
+            newChild.SetParent(columnObject, true);
+            //newChild.SetAsFirstSibling();
+            //newChild.SetAsLastSibling();
         }
-        return columnObject;
+        return columnObject.gameObject;
     }
 
     private List<GameObject> FindChain(int column, bool filled)

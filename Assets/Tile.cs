@@ -50,27 +50,7 @@ public class Tile : MonoBehaviour
         int z = (int)board.GridPosFromWorldPos(this.transform.position).z;
         objectPosition = new Vector3(transform.position.x, 0, transform.position.z);
     }
-    void Update()
-    {
-        if (CurrentSelected != null)
-        {
-            tempTestPlatA = CurrentSelected.gameObject;
-        }
-        if (PreviousSelected != null)
-        {
-            tempTestPlatB = PreviousSelected.gameObject;
-        }
-        if (!platformMesh || !board.enableText)
-        {
-            text.enabled = false;
-        }
-        else
-        {
-            int zPos = board.GridPosFromWorldPos(platform.transform.position).z;
-            text.SetText(zPos.ToString());
-            text.enabled = true;
-        }
-    }
+
     #endregion
     public void DisableTile()
     {
@@ -167,7 +147,6 @@ public class Tile : MonoBehaviour
             {
                 Debug.Log("Removed " + board.matchingTiles.Count + " tiles");
                 board.matchingTiles[j].GetComponent<Tile>().UpdateTileInfo();
-                //board.matchingTiles[j].transform.GetComponent<Tile>().platform.GetComponent<MeshRenderer>().enabled = false;
                 board.matchingTiles[j].GetComponent<Tile>().DisableTile();
             }
             board.ShiftBoard();
