@@ -14,6 +14,7 @@ public class BoardManager : MonoBehaviour
 
     [Header("Board Shift Animations")]
     [SerializeField] private float introduceNewTileTime;
+    [SerializeField] private float shiftTileDelay;
 
     [Header("Board Shift Animations")]
     [SerializeField] private Vector2 shiftDirection;
@@ -206,18 +207,20 @@ public class BoardManager : MonoBehaviour
         return _columnObject.gameObject;
     }
 
+    public GameObject testCube;
     private List<GameObject> FindChain(int column, bool filled)
     {
         List<GameObject> chain = new List<GameObject>();
+
         bool _firstTile = new bool();
         filled = !filled;
         for (int z = zSize - 1; z >= 0; z--)
         {
             Tile tile = grid[column, z].GetComponent<Tile>();
-
             if (tile.platformMesh == filled)
             {
                 _firstTile = filled;
+                Instantiate(testCube, grid[column, z].transform);
                 chain.Add(tile.platform);
             }
             else if (_firstTile)
@@ -253,7 +256,8 @@ public class BoardManager : MonoBehaviour
     {
         for (int x = 0; x < xSize; x++)
         {
-            AnimateColumn(x);
+            //AnimateColumn(x);
+            //FindNullTiles(x);
         }
     }
 
@@ -265,7 +269,7 @@ public class BoardManager : MonoBehaviour
 
         if (lowestChainPos == nextTilePos)
         {
-            StartCoroutine(IntroduceNewTile(FindChain(x, true).Count, x));
+            // StartCoroutine(IntroduceNewTile(FindChain(x, true).Count, x));
             return;
         }
         GameObject currentColumn = PoolGroup(currentChain, x, lowestChainPos);
@@ -273,38 +277,75 @@ public class BoardManager : MonoBehaviour
         {
             return;
         }
+        int distanceMoved = lowestChainPos - nextTilePos;
 
         LeanTween.moveZ(currentColumn, grid[x, nextTilePos].transform.position.z, shiftSpeed * (lowestChainPos - nextTilePos)).setEase(shitAnimCurve).setOnComplete(() =>
-                      {
-                          int distanceMoved = lowestChainPos - nextTilePos;
+                    {
+                        int distanceMoved = lowestChainPos - nextTilePos;
 
-                          for (int z = 0; z < currentChain.Count; z++)
-                          {
+                        for (int z = 0; z < currentChain.Count; z++)
+                        {
 
-                              int currentTilePos = lowestChainPos + z;
-                              int nextPos = lowestChainPos - distanceMoved + z;
+                            int currentTilePos = lowestChainPos + z;
+                            int nextPos = lowestChainPos - distanceMoved + z;
 
-                              Tile currentTile = grid[x, currentTilePos].GetComponent<Tile>();
-                              Tile nextTile = grid[x, nextPos].GetComponent<Tile>();
+                            Tile currentTile = grid[x, currentTilePos].GetComponent<Tile>();
+                            Tile nextTile = grid[x, nextPos].GetComponent<Tile>();
 
-                              GameObject tempPlatorm = currentTile.platform;
+                            GameObject tempPlatorm = currentTile.platform;
 
-                              currentTile.platform = nextTile.platform;
-                              nextTile.platform = tempPlatorm;
+                            currentTile.platform = nextTile.platform;
+                            nextTile.platform = tempPlatorm;
 
-                              nextTile.UpdateTileInfo();
-                              currentTile.UpdateTileInfo();
-                          }
-                          AnimateColumn(x);
-                      });
+                            nextTile.UpdateTileInfo();
+                            currentTile.UpdateTileInfo();
+                        }
+                        AnimateColumn(x);
+                    });
+    }
+
+    private void FindNullTiles(int x)
+    {
+        List<GameObject> chain = FindChain(x, false);
+        int lowestTile = LowestGridPos(x, chain);
+        int nextAvailablePos = NextTilePos(x, lowestTile);
+
+        chain.Reverse();
+        for (int z = 0; z < chain.Count; z++)
+        {
+            Tile nextTile = grid[x, nextAvailablePos + z].GetComponent<Tile>();
+
+            LeanTween.moveZ(chain[z], grid[x, nextAvailablePos + z].transform.position.z, shiftSpeed).setEase(shitAnimCurve).setOnComplete(() =>
+            {
+
+            });
+        }
+    }
+
+    private void SwapTileReference(int currentPos)
+    {
+
+    }
+
+    bool EmptyBelow(int x, int z)
+    {
+        if (x <= 0 || z - 1 <= 0) { return false; }
+        if (grid[x, z - 1].GetComponent<Tile>().platformMesh == false)
+        {
+            return true;
+        }
+        else
+        {
+            return false;
+        }
     }
 
     private IEnumerator IntroduceNewTile(int amount, int x)
     {
         WaitForSeconds wait = new WaitForSeconds(introduceNewTileTime);
-        for (int i = 1; i <= amount; i++)
+        for (int z = 1; z <= amount; z++)
         {
-            int _newZPos = (zSize - 1) - amount + i;
+            int _newZPos = (zSize - 1) - amount + z;
             if (_newZPos > zSize || _newZPos < 0)
             {
                 continue;
