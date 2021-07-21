@@ -40,7 +40,7 @@ public class BoardManager : MonoBehaviour
 
     private void Awake()
     {
-        LeanTween.init(5000);
+        LeanTween.init(xSize * zSize);
     }
     private void Start()
     {
@@ -220,7 +220,6 @@ public class BoardManager : MonoBehaviour
             if (tile.platformMesh == filled)
             {
                 _firstTile = filled;
-                Instantiate(testCube, grid[column, z].transform);
                 chain.Add(tile.platform);
             }
             else if (_firstTile)
@@ -257,7 +256,7 @@ public class BoardManager : MonoBehaviour
         for (int x = 0; x < xSize; x++)
         {
             //AnimateColumn(x);
-            //FindNullTiles(x);
+            FindNullTiles(x);
         }
     }
 
@@ -309,22 +308,44 @@ public class BoardManager : MonoBehaviour
         List<GameObject> chain = FindChain(x, false);
         int lowestTile = LowestGridPos(x, chain);
         int nextAvailablePos = NextTilePos(x, lowestTile);
+        if (lowestTile == nextAvailablePos)
+        {
+            StartCoroutine(IntroduceNewTile(FindChain(x, true).Count, x));
+            return;
+        }
 
         chain.Reverse();
         for (int z = 0; z < chain.Count; z++)
         {
-            Tile nextTile = grid[x, nextAvailablePos + z].GetComponent<Tile>();
+            int nextPos = nextAvailablePos + z;
 
-            LeanTween.moveZ(chain[z], grid[x, nextAvailablePos + z].transform.position.z, shiftSpeed).setEase(shitAnimCurve).setOnComplete(() =>
+            LeanTween.moveZ(chain[z], grid[x, nextPos].transform.position.z, shiftSpeed).setEase(shitAnimCurve).setOnComplete(() =>
             {
 
             });
+            swapTile(x, GridPosFromWorldPos(chain[z].transform.position).z, nextPos);
         }
+        StartCoroutine(NullTileDelay(x));
     }
 
-    private void SwapTileReference(int currentPos)
+    private IEnumerator NullTileDelay(int x)
     {
+        yield return new WaitForSeconds(0.1f);
+        FindNullTiles(x);
+    }
 
+    void swapTile(int x, int currentPos, int newPos)
+    {
+        Tile currentTile = grid[x, currentPos].GetComponent<Tile>();
+        Tile nextTile = grid[x, newPos].GetComponent<Tile>();
+
+        GameObject tempPlatform = currentTile.platform;
+
+        currentTile.platform = nextTile.platform;
+        nextTile.platform = tempPlatform;
+
+        currentTile.UpdateTileInfo();
+        nextTile.UpdateTileInfo();
     }
 
     bool EmptyBelow(int x, int z)
