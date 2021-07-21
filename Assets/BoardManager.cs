@@ -14,7 +14,6 @@ public class BoardManager : MonoBehaviour
 
     [Header("Board Shift Animations")]
     [SerializeField] private float introduceNewTileTime;
-    [SerializeField] private float shiftTileDelay;
 
     [Header("Board Shift Animations")]
     [SerializeField] private Vector2 shiftDirection;
@@ -40,7 +39,7 @@ public class BoardManager : MonoBehaviour
 
     private void Awake()
     {
-        LeanTween.init(xSize * zSize);
+        LeanTween.init((xSize * zSize) + 1000);
     }
     private void Start()
     {
@@ -59,10 +58,6 @@ public class BoardManager : MonoBehaviour
 
         CreateBoard(addativeOffset.x, addativeOffset.y);
 
-        for (int x = 0; x < xSize; x++)
-        {
-            CreateGroup(FindChain(x, false), x);
-        }
     }
 
 
@@ -127,6 +122,7 @@ public class BoardManager : MonoBehaviour
                 gridTile.name = "x = " + x + " || " + " z = " + z;
                 grid[x, z] = gridTile;
                 tempParent.transform.position = grid[x, 0].transform.position;
+                tempParent.name = "ColumnObject: " + x;
                 gridTile.transform.SetParent(tempParent.transform);
                 gridTile.GetComponent<Tile>().objectGridPosition = new Vector2(x, z);
 
@@ -173,41 +169,6 @@ public class BoardManager : MonoBehaviour
         return (x, z);
     }
 
-    private List<GameObject> CreateGroup(List<GameObject> chain, int x)
-    {
-        GameObject columnObject = new GameObject();
-        //columnObject.transform.parent = this.transform;
-        columnObject.transform.position = grid[x, LowestGridPos(x, chain)].transform.position;
-        columnObject.transform.name = "ColumnObject: " + x;
-        listOfColumns.Add(columnObject);
-
-        return listOfColumns;
-    }
-
-    private GameObject PoolGroup(List<GameObject> chain, int x, int columnPos)
-    {
-        //major performance issue!!
-        //note: deatching all children shouldn't be necessary as some objects in the list of chains should already be parented to the columnObject. They just need to be reorganized by possibly using SetSiblingIndex and only parenting the objects of child if they are not already parented to it.
-
-        Transform _columnObject = listOfColumns[x].gameObject.transform;
-        _columnObject.transform.DetachChildren();
-
-        //technically not needed, but the column still moves.
-        _columnObject.position = grid[x, columnPos].transform.position;
-
-        for (int j = 0; j < chain.Count; j++)
-        {
-            Transform _newChild = chain[j].transform;
-            if (_newChild.parent == _columnObject)
-            {
-                continue;
-            }
-            _newChild.SetParent(_columnObject, true);
-        }
-        return _columnObject.gameObject;
-    }
-
-    public GameObject testCube;
     private List<GameObject> FindChain(int column, bool filled)
     {
         List<GameObject> chain = new List<GameObject>();
@@ -231,7 +192,6 @@ public class BoardManager : MonoBehaviour
         _firstTile = false;
         return chain;
     }
-
     private int NextTilePos(int column, int currentPos)
     {
         //Performance OR Code cleanliness could potentially be improved by combining NexTilePos & FindChain
@@ -255,86 +215,41 @@ public class BoardManager : MonoBehaviour
     {
         for (int x = 0; x < xSize; x++)
         {
-            //AnimateColumn(x);
-            FindNullTiles(x);
+            AnimateColumn(x);
         }
     }
-
     private void AnimateColumn(int x)
-    {
-        List<GameObject> currentChain = FindChain(x, false);
-        int lowestChainPos = LowestGridPos(x, currentChain);
-        int nextTilePos = NextTilePos(x, lowestChainPos);
-
-        if (lowestChainPos == nextTilePos)
-        {
-            // StartCoroutine(IntroduceNewTile(FindChain(x, true).Count, x));
-            return;
-        }
-        GameObject currentColumn = PoolGroup(currentChain, x, lowestChainPos);
-        if (lowestChainPos <= 0 || nextTilePos < 0)
-        {
-            return;
-        }
-        int distanceMoved = lowestChainPos - nextTilePos;
-
-        LeanTween.moveZ(currentColumn, grid[x, nextTilePos].transform.position.z, shiftSpeed * (lowestChainPos - nextTilePos)).setEase(shitAnimCurve).setOnComplete(() =>
-                    {
-                        int distanceMoved = lowestChainPos - nextTilePos;
-
-                        for (int z = 0; z < currentChain.Count; z++)
-                        {
-
-                            int currentTilePos = lowestChainPos + z;
-                            int nextPos = lowestChainPos - distanceMoved + z;
-
-                            Tile currentTile = grid[x, currentTilePos].GetComponent<Tile>();
-                            Tile nextTile = grid[x, nextPos].GetComponent<Tile>();
-
-                            GameObject tempPlatorm = currentTile.platform;
-
-                            currentTile.platform = nextTile.platform;
-                            nextTile.platform = tempPlatorm;
-
-                            nextTile.UpdateTileInfo();
-                            currentTile.UpdateTileInfo();
-                        }
-                        AnimateColumn(x);
-                    });
-    }
-
-    private void FindNullTiles(int x)
     {
         List<GameObject> chain = FindChain(x, false);
         int lowestTile = LowestGridPos(x, chain);
         int nextAvailablePos = NextTilePos(x, lowestTile);
-        if (lowestTile == nextAvailablePos)
+        if (lowestTile == nextAvailablePos || chain.Count == 0)
         {
             StartCoroutine(IntroduceNewTile(FindChain(x, true).Count, x));
             return;
         }
 
         chain.Reverse();
+        float distance = lowestTile - nextAvailablePos;
+        float time = distance / shiftSpeed;
+
         for (int z = 0; z < chain.Count; z++)
         {
             int nextPos = nextAvailablePos + z;
+            LeanTween.moveZ(chain[z], grid[x, nextPos].transform.position.z, time).setEase(shitAnimCurve);
+            SwapTile(x, GridPosFromWorldPos(chain[z].transform.position).z, nextPos);
 
-            LeanTween.moveZ(chain[z], grid[x, nextPos].transform.position.z, shiftSpeed).setEase(shitAnimCurve).setOnComplete(() =>
-            {
-
-            });
-            swapTile(x, GridPosFromWorldPos(chain[z].transform.position).z, nextPos);
         }
-        StartCoroutine(NullTileDelay(x));
+        StartCoroutine(NullTileDelay(x, time));
     }
 
-    private IEnumerator NullTileDelay(int x)
+    private IEnumerator NullTileDelay(int x, float time)
     {
-        yield return new WaitForSeconds(0.1f);
-        FindNullTiles(x);
+        yield return new WaitForSeconds(time);
+        AnimateColumn(x);
     }
 
-    void swapTile(int x, int currentPos, int newPos)
+    void SwapTile(int x, int currentPos, int newPos)
     {
         Tile currentTile = grid[x, currentPos].GetComponent<Tile>();
         Tile nextTile = grid[x, newPos].GetComponent<Tile>();
@@ -347,20 +262,6 @@ public class BoardManager : MonoBehaviour
         currentTile.UpdateTileInfo();
         nextTile.UpdateTileInfo();
     }
-
-    bool EmptyBelow(int x, int z)
-    {
-        if (x <= 0 || z - 1 <= 0) { return false; }
-        if (grid[x, z - 1].GetComponent<Tile>().platformMesh == false)
-        {
-            return true;
-        }
-        else
-        {
-            return false;
-        }
-    }
-
     private IEnumerator IntroduceNewTile(int amount, int x)
     {
         WaitForSeconds wait = new WaitForSeconds(introduceNewTileTime);

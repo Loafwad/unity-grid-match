@@ -86,19 +86,17 @@ public class GridAnimations : MonoBehaviour
         LeanTween.moveY(platform, 0, hoverExitTime).setEase(hoverCurve);
     }
 
-    public LTSeq IntroduceNewTile(GameObject platform, Vector3 newPosition, int zSize)
+    public void IntroduceNewTile(GameObject platform, Vector3 newPosition, int zSize)
     {
         //seq.append(introduceDelay);
 
         platform.transform.position = new Vector3(newPosition.x, introduceStartPosY + newPosition.y, newPosition.z + introduceStartPosZ);
 
-        float distance = Vector3.Distance(platform.transform.position, newPosition);
-        float newRot = platform.transform.eulerAngles.z - (introduceStartPosY * distance);
+        float newRot = platform.transform.eulerAngles.z - (introduceStartPosY);
 
-        LeanTween.rotateAroundLocal(platform, new Vector3(1, 0, 0), newRot, introduceRotationTime).setEase(introduceRotationCurve);
+        //LeanTween.rotateAroundLocal(platform, new Vector3(1, 0, 0), newRot, introduceRotationTime).setEase(introduceRotationCurve);
 
         LeanTween.moveY(platform, newPosition.y, introduceTimeY).setEase(introduceCurveY);
         LeanTween.moveZ(platform, newPosition.z, introduceTimeZ).setEase(introduceCurveZ);
-        return seq;
     }
 }

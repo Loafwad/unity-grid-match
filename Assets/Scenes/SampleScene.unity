@@ -410,17 +410,22 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 061b3d3bea9cc824ba58dca6eececc99, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  xSize: 150
-  zSize: 150
+  xSize: 100
+  zSize: 100
   characters:
   - {fileID: 4431933056309372495, guid: 348ec3087fd0f79438393f0088f65523, type: 3}
-  - {fileID: 4431933056309372495, guid: 7c53d4928afb610419ca47405f252735, type: 3}
+  - {fileID: 1994711068026769089, guid: b3c971bf6543ada4bb851bd37c39cba5, type: 3}
+  - {fileID: 1840866727283387762, guid: 24cdc4282c7a838469f7a436a688091f, type: 3}
+  - {fileID: 4288595724577034578, guid: d014daef52604fb4391970a37cd84f2e, type: 3}
+  - {fileID: 2557460384284899917, guid: 46748458b16b43645b283cd7b5bb89ba, type: 3}
+  - {fileID: 7108865896901171740, guid: a90a3d1c194bc88448e42655caf356eb, type: 3}
   - {fileID: 7767526736648998531, guid: 50b987c1b193ee94882d90bf2446b729, type: 3}
+  - {fileID: 4431933056309372495, guid: 7c53d4928afb610419ca47405f252735, type: 3}
+  - {fileID: 4431933056309372495, guid: 62df7f6176a981d40bf2ba4bd6264a52, type: 3}
   prefabTile: {fileID: 6825236227529461375, guid: b39b645e25570974f86534dc2205245e, type: 3}
-  introduceNewTileTime: 0.01
-  shiftTileDelay: 0
+  introduceNewTileTime: 0.05
   shiftDirection: {x: 0, y: 1}
-  shiftSpeed: 0.1
+  shiftSpeed: 45
   shitAnimCurve:
     serializedVersion: 2
     m_Curve:
@@ -452,7 +457,6 @@ MonoBehaviour:
   rndRemoveAmount: 0.499
   matchingTiles: []
   enableText: 0
-  testCube: {fileID: 2376181265151612019, guid: 8d093033ef401f748aae9af1e1df75a3, type: 3}
 --- !u!4 &685199452
 Transform:
   m_ObjectHideFlags: 0
@@ -1338,8 +1342,8 @@ MonoBehaviour:
     m_PreInfinity: 2
     m_PostInfinity: 2
     m_RotationOrder: 4
-  introduceTimeY: 0.1
-  introduceStartPosY: 4
+  introduceTimeY: 0.6
+  introduceStartPosY: -24
   introduceCurveZ:
     serializedVersion: 2
     m_Curve:
@@ -1373,14 +1377,14 @@ MonoBehaviour:
     m_PreInfinity: 2
     m_PostInfinity: 2
     m_RotationOrder: 4
-  introduceTimeZ: 0.2
-  introduceStartPosZ: 12
+  introduceTimeZ: 1
+  introduceStartPosZ: 24
   introduceRotationCurve:
     serializedVersion: 2
     m_Curve:
     - serializedVersion: 3
-      time: 0
-      value: 0
+      time: -0.006095886
+      value: 1.0010681
       inSlope: 0
       outSlope: 0
       tangentMode: 0
@@ -1389,27 +1393,27 @@ MonoBehaviour:
       outWeight: 0
     - serializedVersion: 3
       time: 0.49583286
-      value: 0.98294085
-      inSlope: 0
-      outSlope: 0
+      value: 0.9548711
+      inSlope: -0.95753056
+      outSlope: -0.95753056
       tangentMode: 0
       weightedMode: 0
-      inWeight: 0.33333334
-      outWeight: 0.33333334
+      inWeight: 0.18117301
+      outWeight: 0.21965401
     - serializedVersion: 3
       time: 1
       value: 0
-      inSlope: 0
-      outSlope: 0
+      inSlope: 3.6673415
+      outSlope: 3.6673415
       tangentMode: 0
       weightedMode: 0
-      inWeight: 0
+      inWeight: 0.21142478
       outWeight: 0
     m_PreInfinity: 2
     m_PostInfinity: 2
     m_RotationOrder: 4
-  introduceRotationTime: 0.1
-  introduceDelay: 1
+  introduceRotationTime: 0.6
+  introduceDelay: 0
 --- !u!1 &1294395123
 GameObject:
   m_ObjectHideFlags: 0

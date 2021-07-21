@@ -30,11 +30,6 @@ public class Tile : MonoBehaviour
     [SerializeField]
     private List<GameObject> _adjacentTiles;
     MeshRenderer mesh;
-    TextMeshPro text;
-
-    [SerializeField] GameObject tempTestPlatA;
-    [SerializeField] GameObject tempTestPlatB;
-
 
     #region Awake/Start/Update
 
@@ -63,7 +58,6 @@ public class Tile : MonoBehaviour
         mesh = platform.GetComponent<MeshRenderer>();
         color = mesh.sharedMaterial.name;
         platformMesh = mesh.enabled;
-        text = platform.GetComponentInChildren<TextMeshPro>();
 
         return mesh;
     }
