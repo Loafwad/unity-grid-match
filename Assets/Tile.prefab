@@ -281,11 +281,29 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   animSwitchCurve:
     serializedVersion: 2
-    m_Curve: []
+    m_Curve:
+    - serializedVersion: 3
+      time: 0
+      value: 0
+      inSlope: 0
+      outSlope: 0
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0
+      outWeight: 0
+    - serializedVersion: 3
+      time: 1
+      value: 1
+      inSlope: 0
+      outSlope: 0
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0
+      outWeight: 0
     m_PreInfinity: 2
     m_PostInfinity: 2
     m_RotationOrder: 4
-  animSwitchDuration: 1
+  animSwitchDuration: 0.2
   color: 
   platform: {fileID: 7191883733936921857}
   objectGridPosition: {x: 0, y: 0}
@@ -293,8 +311,6 @@ MonoBehaviour:
   isShifting: 0
   platformMesh: 0
   _adjacentTiles: []
-  tempTestPlatA: {fileID: 0}
-  tempTestPlatB: {fileID: 0}
 --- !u!65 &4860381895955533878
 BoxCollider:
   m_ObjectHideFlags: 0

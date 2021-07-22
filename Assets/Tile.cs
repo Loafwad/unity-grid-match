@@ -7,7 +7,10 @@ using TMPro;
 public class Tile : MonoBehaviour
 {
     private BoardManager board = BoardManager.instance;
+    private CurrentSelection selectionSquare = CurrentSelection.selection;
+    private PreviousSelection prevSelectionSquare = PreviousSelection.selection;
     private GridAnimations anim;
+
 
     public static Tile CurrentSelected;
     public static Tile PreviousSelected;
@@ -52,6 +55,34 @@ public class Tile : MonoBehaviour
         mesh.enabled = false;
         UpdateTileInfo();
     }
+    void OnMouseDown()
+    {
+        if (CurrentSelected == null)
+        {
+            selectionSquare.SetPosition(this.transform.position);
+            prevSelectionSquare.SetPosition(new Vector3(-100f, -100f, 0));
+            Select();
+            CurrentSelected = this.GetComponent<Tile>();
+        }
+        else if (CurrentSelected == this)
+        {
+            Deselect();
+            selectionSquare.SetPosition(this.transform.position);
+            prevSelectionSquare.SetPosition(CurrentSelected.transform.position);
+            PreviousSelected = CurrentSelected;
+            prevSelectionSquare.SetPosition(new Vector3(-100f, -100f, 0));
+            CurrentSelected = null;
+        }
+        else
+        {
+            prevSelectionSquare.SetPosition(CurrentSelected.transform.position);
+            PreviousSelected = CurrentSelected;
+            selectionSquare.SetPosition(this.transform.position);
+            CurrentSelected = this.GetComponent<Tile>();
+            SwitchPlatforms(CurrentSelected.gameObject, PreviousSelected.gameObject);
+
+        }
+    }
 
     public MeshRenderer UpdateTileInfo()
     {
@@ -64,6 +95,7 @@ public class Tile : MonoBehaviour
 
     public void SwitchPlatforms(GameObject objectA, GameObject objectB)
     {
+        Debug.Log("switching platforms");
         GameObject platformA = objectA.GetComponent<Tile>().platform;
         GameObject platformB = objectB.GetComponent<Tile>().platform;
 
@@ -71,8 +103,17 @@ public class Tile : MonoBehaviour
         LeanTween.move(platformB, platformA.transform.position, animSwitchDuration).setEase(animSwitchCurve);
 
         GameObject tempPlatform = platformA;
-        platformA = platformB;
-        platformB = tempPlatform;
+        objectA.GetComponent<Tile>().platform = platformB;
+        objectB.GetComponent<Tile>().platform = tempPlatform;
+
+        //seperate this top function later
+        objectA.GetComponent<Tile>().Deselect();
+        selectionSquare.SetPosition(new Vector3(-100f, -100f, 0));
+        CurrentSelected = null;
+
+        objectB.GetComponent<Tile>().Deselect();
+        prevSelectionSquare.SetPosition(new Vector3(-100f, -100f, 0));
+        PreviousSelected = null;
 
         objectA.GetComponent<Tile>().UpdateTileInfo();
         objectB.GetComponent<Tile>().UpdateTileInfo();
@@ -149,15 +190,11 @@ public class Tile : MonoBehaviour
 
     void Select()
     {
-        CurrentSelected = this;
-        PreviousSelected = this;
         anim.TileSelection(platform);
     }
 
     void Deselect()
     {
-        CurrentSelected = null;
-        PreviousSelected = null;
         anim.TileDeselection(platform);
     }
 }

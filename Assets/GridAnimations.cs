@@ -67,13 +67,19 @@ public class GridAnimations : MonoBehaviour
     public void TileSelection(GameObject platform)
     {
         LeanTween.moveY(platform, 1, selectDurationTime).setEase(selectCurve);
-        LeanTween.rotateAroundLocal(platform, new Vector3(1, 0, 0), 180, selectRotTime).setEase(selectRotCurve);
+        LeanTween.rotateAroundLocal(platform, new Vector3(1, 0, 0), 180, selectRotTime).setEase(selectRotCurve).setOnComplete(() =>
+        {
+            platform.transform.rotation = new Quaternion(0, 0, 0, 0);
+        });
     }
 
     public void TileDeselection(GameObject platform)
     {
         LeanTween.moveY(platform, new Vector3(0, 0, 0).y, deselectTime).setEase(deselectCurve);
-        LeanTween.rotateAroundLocal(platform, new Vector3(1, 0, 0), 180, selectRotTime).setEase(selectRotCurve);
+        LeanTween.rotateAroundLocal(platform, new Vector3(1, 0, 0), 180, selectRotTime).setEase(selectRotCurve).setOnComplete(() =>
+        {
+            platform.transform.rotation = new Quaternion(0, 0, 0, 0);
+        });
     }
 
     public void EnterHover(GameObject platform)
