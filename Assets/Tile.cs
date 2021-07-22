@@ -9,6 +9,8 @@ public class Tile : MonoBehaviour
     private BoardManager board = BoardManager.instance;
     private CurrentSelection selectionSquare = CurrentSelection.selection;
     private PreviousSelection prevSelectionSquare = PreviousSelection.selection;
+
+    private Outline selectionOutline;
     private GridAnimations anim;
 
 
@@ -50,6 +52,11 @@ public class Tile : MonoBehaviour
     }
 
     #endregion
+
+    void Update()
+    {
+        selectionOutline = GetComponent<Outline>();
+    }
     public void DisableTile()
     {
         mesh.enabled = false;
@@ -59,18 +66,26 @@ public class Tile : MonoBehaviour
     {
         if (CurrentSelected == null)
         {
-            selectionSquare.SetPosition(this.transform.position);
-            prevSelectionSquare.SetPosition(new Vector3(-100f, -100f, 0));
             Select();
+            selectionSquare.SetPosition(this.transform.position);
+
+            prevSelectionSquare.SetPosition(new Vector3(-100f, -100f, 0));
+
+            this.selectionOutline.enabled = true;
+
             CurrentSelected = this.GetComponent<Tile>();
         }
         else if (CurrentSelected == this)
         {
             Deselect();
+
+            this.selectionOutline.enabled = false;
             selectionSquare.SetPosition(this.transform.position);
+
             prevSelectionSquare.SetPosition(CurrentSelected.transform.position);
             PreviousSelected = CurrentSelected;
             prevSelectionSquare.SetPosition(new Vector3(-100f, -100f, 0));
+
             CurrentSelected = null;
         }
         else
@@ -102,18 +117,22 @@ public class Tile : MonoBehaviour
         LeanTween.move(platformA, platformB.transform.position, animSwitchDuration).setEase(animSwitchCurve);
         LeanTween.move(platformB, platformA.transform.position, animSwitchDuration).setEase(animSwitchCurve);
 
-        GameObject tempPlatform = platformA;
-        objectA.GetComponent<Tile>().platform = platformB;
-        objectB.GetComponent<Tile>().platform = tempPlatform;
+
 
         //seperate this top function later
         objectA.GetComponent<Tile>().Deselect();
         selectionSquare.SetPosition(new Vector3(-100f, -100f, 0));
+        objectA.GetComponent<Tile>().selectionOutline.enabled = false;
         CurrentSelected = null;
 
         objectB.GetComponent<Tile>().Deselect();
         prevSelectionSquare.SetPosition(new Vector3(-100f, -100f, 0));
+        objectB.GetComponent<Tile>().selectionOutline.enabled = false;
         PreviousSelected = null;
+
+        GameObject tempPlatform = objectA.GetComponent<Tile>().platform;
+        objectA.GetComponent<Tile>().platform = objectB.GetComponent<Tile>().platform;
+        objectB.GetComponent<Tile>().platform = tempPlatform;
 
         objectA.GetComponent<Tile>().UpdateTileInfo();
         objectB.GetComponent<Tile>().UpdateTileInfo();
