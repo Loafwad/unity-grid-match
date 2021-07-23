@@ -218,8 +218,32 @@ public class BoardManager : MonoBehaviour
             AnimateColumn(x);
         }
     }
+
+    public void StartClearMatches()
+    {
+        StartCoroutine(ClearMatches());
+    }
+
+    public IEnumerator ClearMatches()
+    {
+        for (int x = 0; x < xSize; x++)
+        {
+            for (int z = 0; z < zSize; z++)
+            {
+                grid[x, z].GetComponent<Tile>().ClearAllMatches();
+                yield return new WaitForSeconds(0.1f);
+            }
+        }
+        yield return new WaitForSeconds(0.2f);
+        for (int x = 0; x < xSize; x++)
+        {
+            AnimateColumn(x);
+        }
+    }
+
     private void AnimateColumn(int x)
     {
+
         List<GameObject> chain = FindChain(x, false);
         int lowestTile = LowestGridPos(x, chain);
         int nextAvailablePos = NextTilePos(x, lowestTile);
@@ -240,14 +264,15 @@ public class BoardManager : MonoBehaviour
             SwapTile(x, GridPosFromWorldPos(chain[z].transform.position).z, nextPos);
 
         }
-        StartCoroutine(NullTileDelay(x, time));
+        //StartCoroutine(NullTileDelay(x, time));
+        //StartCoroutine(ClearMatches());
     }
 
-    private IEnumerator NullTileDelay(int x, float time)
+    /* private IEnumerator NullTileDelay(int x, float time)
     {
         yield return new WaitForSeconds(time);
         AnimateColumn(x);
-    }
+    } */
 
     void SwapTile(int x, int currentPos, int newPos)
     {
@@ -274,6 +299,8 @@ public class BoardManager : MonoBehaviour
             }
             GameObject gridTile = grid[x, _newZPos];
             GameObject platform = gridTile.GetComponent<Tile>().platform;
+            platform.GetComponent<MeshRenderer>().sharedMaterial = characters[Random.Range(0, characters.Count)].GetComponent<MeshRenderer>().sharedMaterial;
+
 
             anim.IntroduceNewTile(platform, gridTile.transform.position, zSize);
             platform.GetComponent<MeshRenderer>().enabled = true;
