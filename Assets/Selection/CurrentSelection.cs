@@ -6,13 +6,14 @@ public class CurrentSelection : MonoBehaviour
 {
     [SerializeField] private float scaleTime;
     [SerializeField] private AnimationCurve scaleCurve;
-    public static CurrentSelection selection;
+    public static CurrentSelection instance;
 
     void Start()
     {
-        selection = GetComponent<CurrentSelection>();
+        instance = this.GetComponent<CurrentSelection>();
         Animate();
     }
+
     public void SetPosition(Vector3 newPos)
     {
         this.transform.position = newPos;
@@ -20,9 +21,9 @@ public class CurrentSelection : MonoBehaviour
 
     void Animate()
     {
-        LeanTween.scale(this.gameObject, new Vector3(1.2f, 1.2f, 1), scaleTime).setEase(scaleCurve).setOnComplete(() =>
+        LeanTween.scale(this.gameObject, new Vector3(1.4f, 1.4f, 1), scaleTime).setEase(scaleCurve).setOnComplete(() =>
         {
-            LeanTween.scale(this.gameObject, new Vector3(1, 1, 1), scaleTime).setEase(scaleCurve).setOnComplete(() => Animate());
+            LeanTween.scale(this.gameObject, new Vector3(1.2f, 1.2f, 1), scaleTime).setEase(scaleCurve).setOnComplete(() => Animate());
 
         });
     }

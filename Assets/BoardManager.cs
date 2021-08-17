@@ -59,8 +59,6 @@ public class BoardManager : MonoBehaviour
         CreateBoard(addativeOffset.x, addativeOffset.y);
 
     }
-
-
     public void FlipAllTiles()
     {
         List<Tile> listTile = new List<Tile>();
@@ -137,6 +135,7 @@ public class BoardManager : MonoBehaviour
                 //a single object where we just swap the color or materials.
 
                 GameObject allowedTile = possibleCharacters[Random.Range(0, possibleCharacters.Count)];
+                gridTile.transform.GetChild(0).GetComponent<MeshFilter>().sharedMesh = allowedTile.GetComponent<MeshFilter>().sharedMesh;
                 gridTile.transform.GetChild(0).GetComponent<MeshRenderer>().sharedMaterial = allowedTile.GetComponent<MeshRenderer>().sharedMaterial;
 
                 previousLeft[z] = allowedTile;
@@ -213,32 +212,33 @@ public class BoardManager : MonoBehaviour
 
     public void ShiftBoard()
     {
+        StopAllCoroutines();
+        StartCoroutine(Sequence());
+    }
+
+    public IEnumerator Sequence()
+    {
+        yield return new WaitForSeconds(0.2f);
+        yield return StartCoroutine(ClearAllMatches());
         for (int x = 0; x < xSize; x++)
         {
             AnimateColumn(x);
         }
+        yield return new WaitForSeconds(1f);
+        //ShiftBoard();
+        //yield return StartCoroutine(Sequence());
     }
 
-    public void StartClearMatches()
-    {
-        StartCoroutine(ClearMatches());
-    }
-
-    public IEnumerator ClearMatches()
+    public IEnumerator ClearAllMatches()
     {
         for (int x = 0; x < xSize; x++)
         {
             for (int z = 0; z < zSize; z++)
             {
-                grid[x, z].GetComponent<Tile>().ClearAllMatches();
-                yield return new WaitForSeconds(0.1f);
+                grid[x, z].GetComponent<Tile>().ClearMatch();
             }
         }
         yield return new WaitForSeconds(0.2f);
-        for (int x = 0; x < xSize; x++)
-        {
-            AnimateColumn(x);
-        }
     }
 
     private void AnimateColumn(int x)
@@ -262,17 +262,17 @@ public class BoardManager : MonoBehaviour
             int nextPos = nextAvailablePos + z;
             LeanTween.moveZ(chain[z], grid[x, nextPos].transform.position.z, time).setEase(shitAnimCurve);
             SwapTile(x, GridPosFromWorldPos(chain[z].transform.position).z, nextPos);
-
         }
-        //StartCoroutine(NullTileDelay(x, time));
+        StartCoroutine(NullTileDelay(x, time));
         //StartCoroutine(ClearMatches());
+        //StartCoroutine(Stack());
     }
 
-    /* private IEnumerator NullTileDelay(int x, float time)
+    private IEnumerator NullTileDelay(int x, float time)
     {
         yield return new WaitForSeconds(time);
         AnimateColumn(x);
-    } */
+    }
 
     void SwapTile(int x, int currentPos, int newPos)
     {
@@ -290,6 +290,7 @@ public class BoardManager : MonoBehaviour
     private IEnumerator IntroduceNewTile(int amount, int x)
     {
         WaitForSeconds wait = new WaitForSeconds(introduceNewTileTime);
+
         for (int z = 1; z <= amount; z++)
         {
             int _newZPos = (zSize - 1) - amount + z;
@@ -299,7 +300,9 @@ public class BoardManager : MonoBehaviour
             }
             GameObject gridTile = grid[x, _newZPos];
             GameObject platform = gridTile.GetComponent<Tile>().platform;
-            platform.GetComponent<MeshRenderer>().sharedMaterial = characters[Random.Range(0, characters.Count)].GetComponent<MeshRenderer>().sharedMaterial;
+            GameObject allowedTile = characters[Random.Range(0, characters.Count)];
+            platform.GetComponent<MeshRenderer>().sharedMaterial = allowedTile.GetComponent<MeshRenderer>().sharedMaterial;
+            platform.GetComponent<MeshFilter>().sharedMesh = allowedTile.GetComponent<MeshFilter>().sharedMesh;
 
 
             anim.IntroduceNewTile(platform, gridTile.transform.position, zSize);

@@ -96,7 +96,7 @@ public class GridAnimations : MonoBehaviour
     {
         //seq.append(introduceDelay);
 
-        platform.transform.position = new Vector3(newPosition.x, introduceStartPosY + newPosition.y, newPosition.z + introduceStartPosZ);
+        platform.transform.position = new Vector3(newPosition.x, introduceStartPosY + newPosition.y, zSize + introduceStartPosZ);
 
         float newRot = platform.transform.eulerAngles.z - (introduceStartPosY);
 

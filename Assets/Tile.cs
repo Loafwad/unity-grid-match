@@ -7,8 +7,8 @@ using TMPro;
 public class Tile : MonoBehaviour
 {
     private BoardManager board = BoardManager.instance;
-    private CurrentSelection selectionSquare = CurrentSelection.selection;
-    private PreviousSelection prevSelectionSquare = PreviousSelection.selection;
+    private CurrentSelection selectionSquare;
+    private PreviousSelection prevSelectionSquare;
 
     public GameObject floodFillCube;
     private GridAnimations anim;
@@ -44,6 +44,8 @@ public class Tile : MonoBehaviour
     }
     void Start()
     {
+        prevSelectionSquare = GameObject.Find("PreviousSelected").GetComponent<PreviousSelection>();
+        selectionSquare = GameObject.Find("CurrentSelected").GetComponent<CurrentSelection>();
         mesh = UpdateTileInfo();
 
         int x = (int)board.GridPosFromWorldPos(this.transform.position).z;
@@ -63,6 +65,18 @@ public class Tile : MonoBehaviour
         if (CurrentSelected != null)
         {
             prevSelectionSquare.SetPosition(this.transform.position);
+        }
+        if (CurrentSelected != this)
+        {
+            anim.EnterHover(this.platform);
+        }
+    }
+
+    void OnMouseExit()
+    {
+        if (CurrentSelected != this)
+        {
+            anim.ExitHover(this.platform);
         }
     }
 
@@ -197,7 +211,7 @@ public class Tile : MonoBehaviour
         return _adjacentTiles;
     }
 
-    public void ClearAllMatches()
+    public void ClearMatch()
     {
         for (int i = 0; i < board.matchingTiles.Count; i++)
         {
@@ -212,7 +226,7 @@ public class Tile : MonoBehaviour
         {
             for (int j = 0; j < board.matchingTiles.Count; j++)
             {
-                Debug.Log("Removed " + board.matchingTiles.Count + " tiles");
+                //Debug.Log("Removed " + board.matchingTiles.Count + " tiles");
                 board.matchingTiles[j].GetComponent<Tile>().DisableTile();
                 board.matchingTiles[j].GetComponent<Tile>().UpdateTileInfo();
             }

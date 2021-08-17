@@ -6,11 +6,11 @@ public class PreviousSelection : MonoBehaviour
 {
     [SerializeField] private float scaleTime;
     [SerializeField] private AnimationCurve scaleCurve;
-    public static PreviousSelection selection;
+    public static PreviousSelection instance;
 
     void Start()
     {
-        selection = GetComponent<PreviousSelection>();
+        instance = this.GetComponent<PreviousSelection>();
         Animate();
     }
     public void SetPosition(Vector3 newPos)
