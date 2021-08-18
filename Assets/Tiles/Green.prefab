@@ -12,11 +12,11 @@ GameObject:
   - component: {fileID: 2695432625554765933}
   - component: {fileID: 183784437092207783}
   m_Layer: 0
-  m_Name: Green Platform
+  m_Name: Green
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
+  m_StaticEditorFlags: 4294967295
   m_IsActive: 1
 --- !u!4 &1353263674604632008
 Transform:
@@ -39,7 +39,7 @@ MeshFilter:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1840866727283387762}
-  m_Mesh: {fileID: -1550514412580984892, guid: df38e8f408a392c4ebe366e4c1684488, type: 3}
+  m_Mesh: {fileID: -2228417370725966487, guid: dd93e6bf62d928d4e83f9753b668e214, type: 3}
 --- !u!23 &183784437092207783
 MeshRenderer:
   m_ObjectHideFlags: 0

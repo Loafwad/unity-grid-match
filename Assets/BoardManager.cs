@@ -16,7 +16,6 @@ public class BoardManager : MonoBehaviour
     [SerializeField] private float introduceNewTileTime;
 
     [Header("Board Shift Animations")]
-    [SerializeField] private Vector2 shiftDirection;
     [SerializeField] private float shiftSpeed = 1f;
     [SerializeField] private AnimationCurve shitAnimCurve;
 
@@ -58,25 +57,6 @@ public class BoardManager : MonoBehaviour
 
         CreateBoard(addativeOffset.x, addativeOffset.y);
 
-    }
-    public void FlipAllTiles()
-    {
-        List<Tile> listTile = new List<Tile>();
-        reverse = !reverse;
-        for (int x = 0; x < xSize; x++)
-        {
-            StartCoroutine(DelayAnimation(listTile, x));
-        }
-    }
-    bool reverse;
-    IEnumerator DelayAnimation(List<Tile> listTile, int x)
-    {
-        WaitForSeconds wait = new WaitForSeconds(anim.loadTileDelay);
-        for (int z = 0; z < zSize; z++)
-        {
-            anim.TileLoad(grid[x, z].GetComponent<Tile>().platform, reverse);
-            yield return wait;
-        }
     }
 
     public void RemoveRandomTiles()
@@ -129,10 +109,6 @@ public class BoardManager : MonoBehaviour
 
                 possibleCharacters.Remove(previousLeft[z]);
                 possibleCharacters.Remove(previousBelow);
-
-                //Performance-note:
-                //Performance and load times could be improved if we used a single material and/or colors and
-                //a single object where we just swap the color or materials.
 
                 GameObject allowedTile = possibleCharacters[Random.Range(0, possibleCharacters.Count)];
                 gridTile.transform.GetChild(0).GetComponent<MeshFilter>().sharedMesh = allowedTile.GetComponent<MeshFilter>().sharedMesh;
@@ -193,8 +169,6 @@ public class BoardManager : MonoBehaviour
     }
     private int NextTilePos(int column, int currentPos)
     {
-        //Performance OR Code cleanliness could potentially be improved by combining NexTilePos & FindChain
-        //or reducing FindChains complexity in finding empty tiles.
         for (int z = currentPos; z >= 0; z--)
         {
             bool platformMesh = grid[column, z].GetComponent<Tile>().platformMesh;
@@ -212,21 +186,25 @@ public class BoardManager : MonoBehaviour
 
     public void ShiftBoard()
     {
+        animCounter = 0;
         StopAllCoroutines();
         StartCoroutine(Sequence());
     }
-
     public IEnumerator Sequence()
     {
-        yield return new WaitForSeconds(0.2f);
+        yield return new WaitForSeconds(sequenceDelay);
         yield return StartCoroutine(ClearAllMatches());
         for (int x = 0; x < xSize; x++)
         {
             AnimateColumn(x);
         }
-        yield return new WaitForSeconds(1f);
-        //ShiftBoard();
-        //yield return StartCoroutine(Sequence());
+    }
+    public float sequenceDelay;
+    public float boardDelay;
+    public IEnumerator ShiftBoardDelay()
+    {
+        yield return new WaitForSeconds(boardDelay);
+        ShiftBoard();
     }
 
     public IEnumerator ClearAllMatches()
@@ -238,12 +216,11 @@ public class BoardManager : MonoBehaviour
                 grid[x, z].GetComponent<Tile>().ClearMatch();
             }
         }
-        yield return new WaitForSeconds(0.2f);
+        yield return new WaitForSeconds(sequenceDelay);
     }
 
     private void AnimateColumn(int x)
     {
-
         List<GameObject> chain = FindChain(x, false);
         int lowestTile = LowestGridPos(x, chain);
         int nextAvailablePos = NextTilePos(x, lowestTile);
@@ -264,8 +241,6 @@ public class BoardManager : MonoBehaviour
             SwapTile(x, GridPosFromWorldPos(chain[z].transform.position).z, nextPos);
         }
         StartCoroutine(NullTileDelay(x, time));
-        //StartCoroutine(ClearMatches());
-        //StartCoroutine(Stack());
     }
 
     private IEnumerator NullTileDelay(int x, float time)
@@ -287,10 +262,10 @@ public class BoardManager : MonoBehaviour
         currentTile.UpdateTileInfo();
         nextTile.UpdateTileInfo();
     }
+    public int animCounter = 0;
     private IEnumerator IntroduceNewTile(int amount, int x)
     {
         WaitForSeconds wait = new WaitForSeconds(introduceNewTileTime);
-
         for (int z = 1; z <= amount; z++)
         {
             int _newZPos = (zSize - 1) - amount + z;
@@ -304,11 +279,28 @@ public class BoardManager : MonoBehaviour
             platform.GetComponent<MeshRenderer>().sharedMaterial = allowedTile.GetComponent<MeshRenderer>().sharedMaterial;
             platform.GetComponent<MeshFilter>().sharedMesh = allowedTile.GetComponent<MeshFilter>().sharedMesh;
 
+            anim.IntroduceNewTile(platform, gridTile.transform.position, (int)grid[zSize - 1, zSize - 1].transform.position.z).setOnComplete(() =>
+                {
+                    if (amount == z || amount == 0)
+                    {
+                        if (animCounter >= zSize)
+                        {
+                            /*  Debug.Log("Anim is done");
+                             animCounter = 0;
+                             ShiftBoard(); */
+                        }
+                    }
+                });
 
-            anim.IntroduceNewTile(platform, gridTile.transform.position, zSize);
             platform.GetComponent<MeshRenderer>().enabled = true;
             gridTile.GetComponent<Tile>().UpdateTileInfo();
             yield return wait;
+        }
+        animCounter++;
+        if (animCounter == xSize)
+        {
+            animCounter = 0;
+            StartCoroutine(ShiftBoardDelay());
         }
     }
 }
