@@ -151,7 +151,7 @@ public class Tile : MonoBehaviour
         objectA.GetComponent<Tile>().UpdateTileInfo();
         objectB.GetComponent<Tile>().UpdateTileInfo();
 
-        board.ShiftBoard();
+        StartCoroutine(board.ShiftBoardDelay());
     }
 
     void FloodFill(int x, int z)

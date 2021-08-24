@@ -186,8 +186,10 @@ public class BoardManager : MonoBehaviour
 
     public void ShiftBoard()
     {
-        animCounter = 0;
         StopAllCoroutines();
+        tileCompletedCount = 0;
+        totalTilesRemoved = 0;
+        columnAnimCounter = 0;
         StartCoroutine(Sequence());
     }
     public IEnumerator Sequence()
@@ -262,10 +264,13 @@ public class BoardManager : MonoBehaviour
         currentTile.UpdateTileInfo();
         nextTile.UpdateTileInfo();
     }
-    public int animCounter = 0;
+    public int columnAnimCounter = 0;
+    public int tileCompletedCount = 0;
+    public int totalTilesRemoved = 0;
     private IEnumerator IntroduceNewTile(int amount, int x)
     {
         WaitForSeconds wait = new WaitForSeconds(introduceNewTileTime);
+        Debug.Log("introducing tile");
         for (int z = 1; z <= amount; z++)
         {
             int _newZPos = (zSize - 1) - amount + z;
@@ -281,25 +286,27 @@ public class BoardManager : MonoBehaviour
 
             anim.IntroduceNewTile(platform, gridTile.transform.position, (int)grid[zSize - 1, zSize - 1].transform.position.z).setOnComplete(() =>
                 {
-                    if (amount == z || amount == 0)
-                    {
-                        if (animCounter >= zSize)
-                        {
-                            /*  Debug.Log("Anim is done");
-                             animCounter = 0;
-                             ShiftBoard(); */
-                        }
-                    }
+                    tileCompletedCount++;
                 });
 
             platform.GetComponent<MeshRenderer>().enabled = true;
             gridTile.GetComponent<Tile>().UpdateTileInfo();
+
             yield return wait;
         }
-        animCounter++;
-        if (animCounter == xSize)
+        totalTilesRemoved = totalTilesRemoved + amount;
+        columnAnimCounter++;
+        //Debug.Log(x + ":" + amount);
+
+    }
+
+    void Update()
+    {
+        if (columnAnimCounter == xSize && tileCompletedCount == totalTilesRemoved)
         {
-            animCounter = 0;
+            columnAnimCounter = 0;
+            totalTilesRemoved = 0;
+            tileCompletedCount = 0;
             StartCoroutine(ShiftBoardDelay());
         }
     }

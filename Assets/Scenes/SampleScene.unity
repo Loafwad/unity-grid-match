@@ -1168,24 +1168,24 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 061b3d3bea9cc824ba58dca6eececc99, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  xSize: 150
-  zSize: 150
+  xSize: 25
+  zSize: 25
   characters:
   - {fileID: 4431933056309372495, guid: 348ec3087fd0f79438393f0088f65523, type: 3}
   - {fileID: 1994711068026769089, guid: b3c971bf6543ada4bb851bd37c39cba5, type: 3}
   - {fileID: 1840866727283387762, guid: 24cdc4282c7a838469f7a436a688091f, type: 3}
   - {fileID: 4288595724577034578, guid: d014daef52604fb4391970a37cd84f2e, type: 3}
   prefabTile: {fileID: 6825236227529461375, guid: b39b645e25570974f86534dc2205245e, type: 3}
-  introduceNewTileTime: 0
+  introduceNewTileTime: 0.2
   shiftSpeed: 24
   shitAnimCurve:
     serializedVersion: 2
     m_Curve:
     - serializedVersion: 3
       time: 0
-      value: 1
-      inSlope: 0
-      outSlope: 0
+      value: 0
+      inSlope: 1
+      outSlope: 1
       tangentMode: 34
       weightedMode: 0
       inWeight: 0
@@ -1193,8 +1193,8 @@ MonoBehaviour:
     - serializedVersion: 3
       time: 1
       value: 1
-      inSlope: 0
-      outSlope: 0
+      inSlope: 1
+      outSlope: 1
       tangentMode: 34
       weightedMode: 0
       inWeight: 0
@@ -1210,8 +1210,10 @@ MonoBehaviour:
   matchingTiles: []
   enableText: 0
   sequenceDelay: 0
-  boardDelay: 0
-  animCounter: 0
+  boardDelay: 0.5
+  columnAnimCounter: 0
+  tileCompletedCount: 0
+  totalTilesRemoved: 0
 --- !u!4 &685199452
 Transform:
   m_ObjectHideFlags: 0
@@ -1657,7 +1659,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 963194225}
   m_LocalRotation: {x: 0.5011387, y: -0, z: -0, w: 0.865367}
-  m_LocalPosition: {x: 28.7, y: 32.7, z: -0.5}
+  m_LocalPosition: {x: 7.95, y: 15.69, z: -2.79}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children: []
   m_Father: {fileID: 0}
@@ -1892,7 +1894,7 @@ MonoBehaviour:
     m_PreInfinity: 2
     m_PostInfinity: 2
     m_RotationOrder: 4
-  introduceTimeZ: 0
+  introduceTimeZ: 0.25
   introduceStartPosZ: 40
   introduceRotationCurve:
     serializedVersion: 2
