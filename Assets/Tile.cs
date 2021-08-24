@@ -1,99 +1,178 @@
-﻿using UnityEngine;
 using System.Collections;
 using System.Collections.Generic;
+using UnityEngine;
+using TMPro;
 
+[System.Serializable]
 public class Tile : MonoBehaviour
 {
-    private static Tile previousSelected = null;
+    private BoardManager board = BoardManager.instance;
+    private CurrentSelection selectionSquare;
+    private PreviousSelection prevSelectionSquare;
 
-    private MeshRenderer render;
-    private bool isSelected = false;
-    public string color;
-    BoardManager board = BoardManager.instance;
-    [SerializeField] GameObject platform;
+    public GameObject floodFillCube;
+    private GridAnimations anim;
+
+
+    public static Tile CurrentSelected;
+    public static Tile PreviousSelected;
 
     [Header("Switch Tile Animation")]
     public AnimationCurve animSwitchCurve;
     public float animSwitchDuration = 1f;
-
-    [Header("Rotation On Select Animation")]
-    [SerializeField] private AnimationCurve animRotateCurve;
-    [SerializeField] private float rotationTime = 1f;
+    [SerializeField] private string color;
+    [SerializeField] public GameObject platform;
 
     [Header("Position Info")]
     [SerializeField] public Vector2 objectGridPosition;
     [SerializeField] private Vector3 objectPosition;
     [SerializeField] public bool isShifting;
-    [SerializeField] public bool triedToMove;
+
+    [Header("State info")]
+    public bool platformMesh;
+
 
     [SerializeField]
-    private List<GameObject> adjacentTiles;
+    private List<GameObject> _adjacentTiles;
+    MeshRenderer mesh;
 
     #region Awake/Start/Update
+
     void Awake()
     {
-        render = platform.GetComponent<MeshRenderer>();
+        anim = GameObject.Find("BoardAnimator").GetComponent<GridAnimations>();
     }
-
     void Start()
     {
+        prevSelectionSquare = GameObject.Find("PreviousSelected").GetComponent<PreviousSelection>();
+        selectionSquare = GameObject.Find("CurrentSelected").GetComponent<CurrentSelection>();
+        mesh = UpdateTileInfo();
+
+        int x = (int)board.GridPosFromWorldPos(this.transform.position).z;
+        int z = (int)board.GridPosFromWorldPos(this.transform.position).z;
         objectPosition = new Vector3(transform.position.x, 0, transform.position.z);
-        color = this.transform.GetChild(0).GetComponent<MeshRenderer>().sharedMaterial.name;
-    }
-    void Update()
-    {
-        platform = gameObject.transform.GetChild(0).gameObject;
-    }
-    #endregion
-    private void Select()
-    {
-        Hover(true);
-        isSelected = true;
-        previousSelected = gameObject.GetComponent<Tile>();
     }
 
-    private void Deselect()
+    #endregion
+
+    public void DisableTile()
     {
-        Hover(false);
-        isSelected = false;
-        previousSelected = null;
+        mesh.enabled = false;
+        UpdateTileInfo();
     }
+    void OnMouseEnter()
+    {
+        if (CurrentSelected != null)
+        {
+            prevSelectionSquare.SetPosition(this.transform.position);
+        }
+        if (CurrentSelected != this)
+        {
+            anim.EnterHover(this.platform);
+        }
+    }
+
+    void OnMouseExit()
+    {
+        if (CurrentSelected != this)
+        {
+            anim.ExitHover(this.platform);
+        }
+    }
+
     void OnMouseDown()
     {
-        if (isSelected)
+        if (CurrentSelected == null)
+        {
+            Select();
+            selectionSquare.SetPosition(this.transform.position);
+
+            prevSelectionSquare.SetPosition(new Vector3(-100f, -100f, 0));
+
+
+            CurrentSelected = this.GetComponent<Tile>();
+        }
+        else if (CurrentSelected == this)
         {
             Deselect();
+
+            selectionSquare.SetPosition(new Vector3(-100f, -100f, 0));
+
+            prevSelectionSquare.SetPosition(CurrentSelected.transform.position);
+            PreviousSelected = CurrentSelected;
+            prevSelectionSquare.SetPosition(new Vector3(-100f, -100f, 0));
+
+            CurrentSelected = null;
         }
         else
         {
-            if (previousSelected == null)
-            {
-                Select();
-            }
-            else
-            {
-                if (GetAllAdjacentTiles(objectGridPosition).Contains(previousSelected.gameObject))
-                {
-                    SwitchPosition();
-                }
-                else
-                {
-                    previousSelected.GetComponent<Tile>().Deselect();
-                    Select();
-                }
-            }
+            prevSelectionSquare.SetPosition(CurrentSelected.transform.position);
+            PreviousSelected = CurrentSelected;
+            selectionSquare.SetPosition(this.transform.position);
+            CurrentSelected = this.GetComponent<Tile>();
+            SwitchPlatforms(CurrentSelected.gameObject, PreviousSelected.gameObject);
+
         }
+    }
+
+    public MeshRenderer UpdateTileInfo()
+    {
+        mesh = platform.GetComponent<MeshRenderer>();
+        color = mesh.sharedMaterial.name;
+        platformMesh = mesh.enabled;
+
+        return mesh;
+    }
+    int completed = 0;
+
+    public void SwitchPlatforms(GameObject objectA, GameObject objectB)
+    {
+        GameObject platformA = objectA.GetComponent<Tile>().platform;
+        GameObject platformB = objectB.GetComponent<Tile>().platform;
+
+        LeanTween.move(platformA, platformB.transform.position, animSwitchDuration).setEase(animSwitchCurve).setOnComplete(() => completed++);
+        LeanTween.move(platformB, platformA.transform.position, animSwitchDuration).setEase(animSwitchCurve).setOnComplete(() => completed++);
+
+
+
+        //seperate this top function later
+        objectA.GetComponent<Tile>().Deselect();
+        selectionSquare.SetPosition(new Vector3(-100f, -100f, 0));
+        CurrentSelected = null;
+
+        objectB.GetComponent<Tile>().Deselect();
+        prevSelectionSquare.SetPosition(new Vector3(-100f, -100f, 0));
+        PreviousSelected = null;
+
+        GameObject tempPlatform = objectA.GetComponent<Tile>().platform;
+        objectA.GetComponent<Tile>().platform = objectB.GetComponent<Tile>().platform;
+        objectB.GetComponent<Tile>().platform = tempPlatform;
+
+        objectA.GetComponent<Tile>().UpdateTileInfo();
+        objectB.GetComponent<Tile>().UpdateTileInfo();
+
+        StartCoroutine(board.ShiftBoardDelay());
     }
 
     void FloodFill(int x, int z)
     {
         if (x >= 0 && x < board.xSize && z >= 0 && z < board.zSize)
         {
-            if (board.grid[x, z] != null
-            && board.grid[x, z].transform.GetChild(0).GetComponent<MeshRenderer>().sharedMaterial == this.transform.GetChild(0).GetComponent<MeshRenderer>().sharedMaterial
-            && !board.matchingTiles.Contains(board.grid[x, z].gameObject))
+            Material GetMaterial(GameObject gridTile)
             {
-                board.matchingTiles.Add(board.grid[x, z].gameObject);
+                return gridTile.GetComponent<Tile>().platform.GetComponent<MeshRenderer>().sharedMaterial;
+            }
+            UpdateTileInfo();
+            if (board.grid[x, z] != null
+            && GetMaterial(board.grid[x, z]) == mesh.sharedMaterial
+            && !board.matchingTiles.Contains(board.grid[x, z]))
+            {
+                board.matchingTiles.Add(board.grid[x, z]);
+
+                for (int i = 0; i < board.matchingTiles.Count; i++)
+                {
+                    board.matchingTiles[i].GetComponent<Tile>().floodFillCube.SetActive(true);
+                }
                 FloodFill(x + 1, z);
                 FloodFill(x - 1, z);
                 FloodFill(x, z + 1);
@@ -101,16 +180,10 @@ public class Tile : MonoBehaviour
             }
         }
     }
-    public GameObject ObjecAtPosition(int x, int z)
-    {
-        return board.grid[x, z].gameObject;
-    }
-
 
     public List<GameObject> GetAllAdjacentTiles(Vector2 position)
     {
-        adjacentTiles = new List<GameObject>();
-        adjacentTiles.Clear();
+        _adjacentTiles = new List<GameObject>();
         for (int x = -1; x <= 1; x++)
         {
             for (int z = -1; z <= 1; z++)
@@ -119,13 +192,9 @@ public class Tile : MonoBehaviour
                 {
                     continue;
                 }
-                //Debug.Log("index is " + x + "-" + z);
-                //int ix = (int)position.x + x;
-                //int iz = (int)position.y + z;
-
-                int ix = (int)objectGridPosition.x + x;
-                int iz = (int)objectGridPosition.y + z;
-                if (iz < 0 || ix < 0 || ix >= board.xSize || iz >= board.zSize)
+                int _x = (int)objectGridPosition.x + x;
+                int _z = (int)objectGridPosition.y + z;
+                if (_z < 0 || _x < 0 || _x >= board.xSize || _z >= board.zSize)
                 {
                     continue;
                 }
@@ -133,74 +202,44 @@ public class Tile : MonoBehaviour
                 {
                     continue;
                 }
-                if (board.grid[ix, iz] != null)
+                if (board.grid[_x, _z] != null)
                 {
-                    Debug.Log("Added adjacent tile");
-                    adjacentTiles.Add(board.grid[ix, iz].gameObject);
+                    _adjacentTiles.Add(board.grid[_x, _z].gameObject);
                 }
             }
         }
-        return adjacentTiles;
+        return _adjacentTiles;
     }
 
-    //world position is always twice the grid position (dont know why lol)
-    public void ClearAllMatches()
+    public void ClearMatch()
     {
+        for (int i = 0; i < board.matchingTiles.Count; i++)
+        {
+            board.matchingTiles[i].GetComponent<Tile>().floodFillCube.SetActive(false);
+        }
         board.matchingTiles.Clear();
-        Vector3 i;
-        //i.x = Mathf.Round(transform.position.x / 2);
-        i.x = objectGridPosition.x;
-        i.z = objectGridPosition.y;
-        //i.z = Mathf.Round(transform.position.z / 2);
-        FloodFill((int)i.x, (int)i.z);
-        //Instantiate(red, new Vector3(i.x * 2, 0, i.z * 2), Quaternion.identity);
+
+        int _x = (int)objectGridPosition.x;
+        int _z = (int)objectGridPosition.y;
+        FloodFill(_x, _z);
         if (board.matchingTiles.Count >= 3)
         {
             for (int j = 0; j < board.matchingTiles.Count; j++)
             {
-                Debug.Log("Removed " + board.matchingTiles.Count + " tiles");
-                color = "null";
-                board.matchingTiles[j].transform.GetChild(0).GetComponent<MeshRenderer>().enabled = false;
+                //Debug.Log("Removed " + board.matchingTiles.Count + " tiles");
+                board.matchingTiles[j].GetComponent<Tile>().DisableTile();
+                board.matchingTiles[j].GetComponent<Tile>().UpdateTileInfo();
             }
         }
     }
 
-    public void CheckMove()
+    void Select()
     {
-        previousSelected.ClearAllMatches();
-        previousSelected.Deselect();
-        ClearAllMatches();
-        board.FindNullTiles();
+        anim.TileSelection(platform);
     }
 
-    public void SwitchPosition()
+    void Deselect()
     {
-        LeanTween.move(platform, previousSelected.transform.position, animSwitchDuration).setEase(animSwitchCurve).setOnComplete(CheckMove);
-        LeanTween.move(previousSelected.platform, gameObject.transform.position, animSwitchDuration).setEase(animSwitchCurve);
-        platform.transform.parent = previousSelected.transform;
-        previousSelected.platform.transform.parent = this.transform;
+        anim.TileDeselection(platform);
     }
-
-    public void Hover(bool selected)
-    {
-        if (selected)
-        {
-            LeanTween.moveY(platform, 1, animSwitchDuration).setEase(animSwitchCurve);
-            LeanTween.rotate(platform, new Vector3(90, 0, 0), rotationTime).setEase(animRotateCurve);
-        }
-        else
-        {
-            //if (platform.transform.position.y != 0)
-            LeanTween.moveY(platform, platform.transform.position.y - 1, animSwitchDuration).setEase(animSwitchCurve).setOnComplete(ResetPosition);
-            LeanTween.rotate(platform, new Vector3(-90, 0, 0), rotationTime).setEase(animRotateCurve);
-
-        }
-    }
-    public void ResetPosition()
-    {
-        platform.transform.position = transform.position;
-    }
-
 }
-
-
