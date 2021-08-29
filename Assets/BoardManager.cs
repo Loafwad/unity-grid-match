@@ -205,6 +205,7 @@ public class BoardManager : MonoBehaviour
     public float boardDelay;
     public IEnumerator ShiftBoardDelay()
     {
+        StopAllCoroutines();
         yield return new WaitForSeconds(boardDelay);
         ShiftBoard();
     }
