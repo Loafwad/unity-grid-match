@@ -121,17 +121,14 @@ public class Tile : MonoBehaviour
 
         return mesh;
     }
-    int completed = 0;
-
     public void SwitchPlatforms(GameObject objectA, GameObject objectB)
     {
         board.StopAllCoroutines();
         GameObject platformA = objectA.GetComponent<Tile>().platform;
         GameObject platformB = objectB.GetComponent<Tile>().platform;
 
-        LeanTween.move(platformA, platformB.transform.position, animSwitchDuration).setEase(animSwitchCurve).setOnComplete(() => completed++);
-        LeanTween.move(platformB, platformA.transform.position, animSwitchDuration).setEase(animSwitchCurve).setOnComplete(() => completed++);
-
+        LeanTween.move(platformA, platformB.transform.position, animSwitchDuration).setEase(animSwitchCurve);
+        LeanTween.move(platformB, platformA.transform.position, animSwitchDuration).setEase(animSwitchCurve);
 
 
         //seperate this top function later
