@@ -33,7 +33,7 @@ public class Tile : MonoBehaviour
 
 
     [SerializeField]
-    private List<GameObject> _adjacentTiles;
+    private List<GameObject> adjacentTiles;
     MeshRenderer mesh;
 
     #region Awake/Start/Update
@@ -183,7 +183,7 @@ public class Tile : MonoBehaviour
 
     public List<GameObject> GetAllAdjacentTiles(Vector2 position)
     {
-        _adjacentTiles = new List<GameObject>();
+        adjacentTiles = new List<GameObject>();
         for (int x = -1; x <= 1; x++)
         {
             for (int z = -1; z <= 1; z++)
@@ -204,11 +204,11 @@ public class Tile : MonoBehaviour
                 }
                 if (board.grid[_x, _z] != null)
                 {
-                    _adjacentTiles.Add(board.grid[_x, _z].gameObject);
+                    adjacentTiles.Add(board.grid[_x, _z].gameObject);
                 }
             }
         }
-        return _adjacentTiles;
+        return adjacentTiles;
     }
 
     public void ClearMatch()

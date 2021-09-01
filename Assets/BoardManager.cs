@@ -122,18 +122,18 @@ public class BoardManager : MonoBehaviour
 
     private int LowestGridPos(int column, List<GameObject> list)
     {
-        int _lowest = zSize - 1;
+        int lowest = zSize - 1;
 
         foreach (GameObject tile in list)
         {
-            int _tilePos = (int)GridPosFromWorldPos(tile.transform.position).z;
+            int tilePos = (int)GridPosFromWorldPos(tile.transform.position).z;
 
-            if (_tilePos <= _lowest)
+            if (tilePos <= lowest)
             {
-                _lowest = _tilePos;
+                lowest = tilePos;
             }
         }
-        return _lowest;
+        return lowest;
     }
 
     public (int x, int z) GridPosFromWorldPos(Vector3 worldPos)
@@ -148,26 +148,26 @@ public class BoardManager : MonoBehaviour
     {
         List<GameObject> chain = new List<GameObject>();
 
-        bool _firstTile = new bool();
+        bool foundFirst = new bool();
         filled = !filled;
         for (int z = zSize - 1; z >= 0; z--)
         {
             Tile tile = grid[column, z].GetComponent<Tile>();
             if (tile.platformMesh == filled)
             {
-                _firstTile = filled;
+                foundFirst = filled;
                 chain.Add(tile.platform);
             }
-            else if (_firstTile)
+            else if (foundFirst)
             {
                 return chain;
             }
             else { continue; }
         }
-        _firstTile = false;
+        foundFirst = false;
         return chain;
     }
-    private int NextTilePos(int column, int currentPos)
+    private int NextAvailableTilePos(int column, int currentPos)
     {
         for (int z = currentPos; z >= 0; z--)
         {
@@ -205,7 +205,6 @@ public class BoardManager : MonoBehaviour
     public float boardDelay;
     public IEnumerator ShiftBoardDelay()
     {
-        StopAllCoroutines();
         yield return new WaitForSeconds(boardDelay);
         ShiftBoard();
     }
@@ -226,7 +225,7 @@ public class BoardManager : MonoBehaviour
     {
         List<GameObject> chain = FindChain(x, false);
         int lowestTile = LowestGridPos(x, chain);
-        int nextAvailablePos = NextTilePos(x, lowestTile);
+        int nextAvailablePos = NextAvailableTilePos(x, lowestTile);
         if (lowestTile == nextAvailablePos || chain.Count == 0)
         {
             StartCoroutine(IntroduceNewTile(FindChain(x, true).Count, x));
@@ -243,10 +242,10 @@ public class BoardManager : MonoBehaviour
             LeanTween.moveZ(chain[z], grid[x, nextPos].transform.position.z, time).setEase(shitAnimCurve);
             SwapTile(x, GridPosFromWorldPos(chain[z].transform.position).z, nextPos);
         }
-        StartCoroutine(NullTileDelay(x, time));
+        StartCoroutine(AnimateColumnDelay(x, time));
     }
 
-    private IEnumerator NullTileDelay(int x, float time)
+    private IEnumerator AnimateColumnDelay(int x, float time)
     {
         yield return new WaitForSeconds(time);
         AnimateColumn(x);
@@ -297,7 +296,6 @@ public class BoardManager : MonoBehaviour
         }
         totalTilesRemoved = totalTilesRemoved + amount;
         columnAnimCounter++;
-        //Debug.Log(x + ":" + amount);
 
     }
 
