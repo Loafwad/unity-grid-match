@@ -10,9 +10,7 @@ public class Tile : MonoBehaviour
     private CurrentSelection selectionSquare;
     private PreviousSelection prevSelectionSquare;
 
-    public GameObject floodFillCube;
     private GridAnimations anim;
-
 
     public static Tile CurrentSelected;
     public static Tile PreviousSelected;
@@ -127,6 +125,7 @@ public class Tile : MonoBehaviour
 
     public void SwitchPlatforms(GameObject objectA, GameObject objectB)
     {
+        board.StopAllCoroutines();
         GameObject platformA = objectA.GetComponent<Tile>().platform;
         GameObject platformB = objectB.GetComponent<Tile>().platform;
 
@@ -151,7 +150,7 @@ public class Tile : MonoBehaviour
         objectA.GetComponent<Tile>().UpdateTileInfo();
         objectB.GetComponent<Tile>().UpdateTileInfo();
 
-        StartCoroutine(board.ShiftBoardDelay());
+        StartCoroutine(board.ShiftBoard());
     }
 
     void FloodFill(int x, int z)
@@ -169,10 +168,6 @@ public class Tile : MonoBehaviour
             {
                 board.matchingTiles.Add(board.grid[x, z]);
 
-                for (int i = 0; i < board.matchingTiles.Count; i++)
-                {
-                    board.matchingTiles[i].GetComponent<Tile>().floodFillCube.SetActive(true);
-                }
                 FloodFill(x + 1, z);
                 FloodFill(x - 1, z);
                 FloodFill(x, z + 1);
@@ -213,10 +208,6 @@ public class Tile : MonoBehaviour
 
     public void ClearMatch()
     {
-        for (int i = 0; i < board.matchingTiles.Count; i++)
-        {
-            board.matchingTiles[i].GetComponent<Tile>().floodFillCube.SetActive(false);
-        }
         board.matchingTiles.Clear();
 
         int _x = (int)objectGridPosition.x;

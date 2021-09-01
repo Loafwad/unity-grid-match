@@ -26,17 +26,9 @@ public class GridAnimations : MonoBehaviour
 
     [Header("Introduce Tile")]
 
-    [SerializeField] private AnimationCurve introduceCurveY;
-    [SerializeField] private float introduceTimeY;
-    [SerializeField] int introduceStartPosY;
-
     [SerializeField] private AnimationCurve introduceCurveZ;
     [SerializeField] private float introduceTimeZ;
     [SerializeField] int introduceStartPosZ;
-
-    [SerializeField] private AnimationCurve introduceRotationCurve;
-    [SerializeField] float introduceRotationTime;
-    [SerializeField] float introduceDelay;
 
     void Start()
     {
@@ -73,13 +65,8 @@ public class GridAnimations : MonoBehaviour
 
     public LTDescr IntroduceNewTile(GameObject platform, Vector3 newPosition, int zSize)
     {
-        platform.transform.position = new Vector3(newPosition.x, introduceStartPosY + newPosition.y, zSize + introduceStartPosZ);
-
-        float newRot = platform.transform.eulerAngles.z - (introduceStartPosY);
-
-        //LeanTween.rotateAroundLocal(platform, new Vector3(1, 0, 0), newRot, introduceRotationTime).setEase(introduceRotationCurve);
+        platform.transform.position = new Vector3(newPosition.x, newPosition.y, zSize + introduceStartPosZ);
         return (
-        /* LeanTween.moveY(platform, newPosition.y, introduceTimeY).setEase(introduceCurveY) */
         LeanTween.moveZ(platform, newPosition.z, introduceTimeZ).setEase(introduceCurveZ)
         );
     }

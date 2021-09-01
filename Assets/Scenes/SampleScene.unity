@@ -584,16 +584,16 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 061b3d3bea9cc824ba58dca6eececc99, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  xSize: 5
-  zSize: 5
+  xSize: 25
+  zSize: 25
   characters:
   - {fileID: 4431933056309372495, guid: 348ec3087fd0f79438393f0088f65523, type: 3}
   - {fileID: 1994711068026769089, guid: b3c971bf6543ada4bb851bd37c39cba5, type: 3}
   - {fileID: 1840866727283387762, guid: 24cdc4282c7a838469f7a436a688091f, type: 3}
   - {fileID: 4288595724577034578, guid: d014daef52604fb4391970a37cd84f2e, type: 3}
   prefabTile: {fileID: 6825236227529461375, guid: b39b645e25570974f86534dc2205245e, type: 3}
-  introduceNewTileTime: 0.2
-  shiftSpeed: 24
+  introduceNewTileTime: 0.05
+  shiftSpeed: 15
   shitAnimCurve:
     serializedVersion: 2
     m_Curve:
@@ -618,15 +618,14 @@ MonoBehaviour:
     m_PreInfinity: 2
     m_PostInfinity: 2
     m_RotationOrder: 4
-  offset: {x: 1.2, y: 1.2}
+  offset: {x: 1.1, y: 1.1}
   inheritPrefabOffset: 0
   enableClearSkip: 0
   listOfColumns: []
   rndRemoveAmount: 0.499
+  matchDelay: 0.2
   matchingTiles: []
   enableText: 0
-  sequenceDelay: 0
-  boardDelay: 0.5
   columnAnimCounter: 0
   tileCompletedCount: 0
   totalTilesRemoved: 0
@@ -1177,32 +1176,6 @@ MonoBehaviour:
   hoverEnterTime: 0
   hoverExitTime: 0.2
   hoverHeight: 0.5
-  introduceCurveY:
-    serializedVersion: 2
-    m_Curve:
-    - serializedVersion: 3
-      time: 0
-      value: 0
-      inSlope: 1
-      outSlope: 1
-      tangentMode: 34
-      weightedMode: 0
-      inWeight: 0
-      outWeight: 0
-    - serializedVersion: 3
-      time: 1
-      value: 1
-      inSlope: 1
-      outSlope: 1
-      tangentMode: 34
-      weightedMode: 0
-      inWeight: 0
-      outWeight: 0
-    m_PreInfinity: 2
-    m_PostInfinity: 2
-    m_RotationOrder: 4
-  introduceTimeY: 0
-  introduceStartPosY: 0
   introduceCurveZ:
     serializedVersion: 2
     m_Curve:
@@ -1228,42 +1201,7 @@ MonoBehaviour:
     m_PostInfinity: 2
     m_RotationOrder: 4
   introduceTimeZ: 0.25
-  introduceStartPosZ: 40
-  introduceRotationCurve:
-    serializedVersion: 2
-    m_Curve:
-    - serializedVersion: 3
-      time: -0.006095886
-      value: 1.0010681
-      inSlope: 0
-      outSlope: 0
-      tangentMode: 0
-      weightedMode: 0
-      inWeight: 0
-      outWeight: 0
-    - serializedVersion: 3
-      time: 0.49583286
-      value: 0.9548711
-      inSlope: -0.95753056
-      outSlope: -0.95753056
-      tangentMode: 0
-      weightedMode: 0
-      inWeight: 0.18117301
-      outWeight: 0.21965401
-    - serializedVersion: 3
-      time: 1
-      value: 0
-      inSlope: 3.6673415
-      outSlope: 3.6673415
-      tangentMode: 0
-      weightedMode: 0
-      inWeight: 0.21142478
-      outWeight: 0
-    m_PreInfinity: 2
-    m_PostInfinity: 2
-    m_RotationOrder: 4
-  introduceRotationTime: 0
-  introduceDelay: 0
+  introduceStartPosZ: 10
 --- !u!1 &1294395123
 GameObject:
   m_ObjectHideFlags: 0

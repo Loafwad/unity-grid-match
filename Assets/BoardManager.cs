@@ -33,6 +33,8 @@ public class BoardManager : MonoBehaviour
     [Range(0f, 1f)]
     [SerializeField] private float rndRemoveAmount;
 
+    [SerializeField] private float matchDelay;
+
     public List<GameObject> matchingTiles;
     public bool enableText;
 
@@ -42,21 +44,17 @@ public class BoardManager : MonoBehaviour
     }
     private void Start()
     {
-
         instance = GetComponent<BoardManager>();
         anim = GameObject.Find("BoardAnimator").GetComponent<GridAnimations>();
 
-
-        MeshRenderer prefabTileMesh = prefabTile.GetComponent<MeshRenderer>();
+        MeshRenderer prefabTileMesh = prefabTile.GetComponent<Tile>().platform.GetComponent<MeshRenderer>();
         Vector2 prefabOffset = new Vector2(prefabTileMesh.bounds.size.x, prefabTileMesh.bounds.size.z);
         if (inheritPrefabOffset)
             addativeOffset = prefabOffset;
         else
             addativeOffset = offset * prefabOffset;
 
-
         CreateBoard(addativeOffset.x, addativeOffset.y);
-
     }
 
     public void RemoveRandomTiles()
@@ -71,7 +69,8 @@ public class BoardManager : MonoBehaviour
                 }
             }
         }
-        ShiftBoard();
+        StopAllCoroutines();
+        StartCoroutine(ShiftBoard());
     }
 
     private void CreateBoard(float xOffset, float zOffset)
@@ -111,8 +110,8 @@ public class BoardManager : MonoBehaviour
                 possibleCharacters.Remove(previousBelow);
 
                 GameObject allowedTile = possibleCharacters[Random.Range(0, possibleCharacters.Count)];
-                gridTile.transform.GetChild(0).GetComponent<MeshFilter>().sharedMesh = allowedTile.GetComponent<MeshFilter>().sharedMesh;
-                gridTile.transform.GetChild(0).GetComponent<MeshRenderer>().sharedMaterial = allowedTile.GetComponent<MeshRenderer>().sharedMaterial;
+                gridTile.GetComponent<Tile>().platform.GetComponent<MeshFilter>().sharedMesh = allowedTile.GetComponent<MeshFilter>().sharedMesh;
+                gridTile.GetComponent<Tile>().platform.GetComponent<MeshRenderer>().sharedMaterial = allowedTile.GetComponent<MeshRenderer>().sharedMaterial;
 
                 previousLeft[z] = allowedTile;
                 previousBelow = allowedTile;
@@ -123,11 +122,9 @@ public class BoardManager : MonoBehaviour
     private int LowestGridPos(int column, List<GameObject> list)
     {
         int lowest = zSize - 1;
-
         foreach (GameObject tile in list)
         {
             int tilePos = (int)GridPosFromWorldPos(tile.transform.position).z;
-
             if (tilePos <= lowest)
             {
                 lowest = tilePos;
@@ -138,24 +135,24 @@ public class BoardManager : MonoBehaviour
 
     public (int x, int z) GridPosFromWorldPos(Vector3 worldPos)
     {
-        int x = Mathf.RoundToInt(worldPos.x / addativeOffset.x) * (int)addativeOffset.x / 2;
-        int z = Mathf.RoundToInt(worldPos.z / addativeOffset.y) * (int)addativeOffset.y / 2;
+        int x = Mathf.RoundToInt(worldPos.x / addativeOffset.x);
+        int z = Mathf.RoundToInt(worldPos.z / addativeOffset.y);
 
         return (x, z);
     }
 
-    private List<GameObject> FindChain(int column, bool filled)
+    private List<GameObject> FindChain(int column, bool findEmpty)
     {
         List<GameObject> chain = new List<GameObject>();
 
         bool foundFirst = new bool();
-        filled = !filled;
+        findEmpty = !findEmpty;
         for (int z = zSize - 1; z >= 0; z--)
         {
             Tile tile = grid[column, z].GetComponent<Tile>();
-            if (tile.platformMesh == filled)
+            if (tile.platformMesh == findEmpty)
             {
-                foundFirst = filled;
+                foundFirst = findEmpty;
                 chain.Add(tile.platform);
             }
             else if (foundFirst)
@@ -167,7 +164,7 @@ public class BoardManager : MonoBehaviour
         foundFirst = false;
         return chain;
     }
-    private int NextAvailableTilePos(int column, int currentPos)
+    private int NextAvailableGridPos(int column, int currentPos)
     {
         for (int z = currentPos; z >= 0; z--)
         {
@@ -184,29 +181,17 @@ public class BoardManager : MonoBehaviour
         return 0;
     }
 
-    public void ShiftBoard()
+    public IEnumerator ShiftBoard()
     {
-        StopAllCoroutines();
         tileCompletedCount = 0;
         totalTilesRemoved = 0;
         columnAnimCounter = 0;
-        StartCoroutine(Sequence());
-    }
-    public IEnumerator Sequence()
-    {
-        yield return new WaitForSeconds(sequenceDelay);
+        yield return new WaitForSeconds(matchDelay);
         yield return StartCoroutine(ClearAllMatches());
         for (int x = 0; x < xSize; x++)
         {
-            AnimateColumn(x);
+            StartCoroutine(AnimateColumn(x, 0));
         }
-    }
-    public float sequenceDelay;
-    public float boardDelay;
-    public IEnumerator ShiftBoardDelay()
-    {
-        yield return new WaitForSeconds(boardDelay);
-        ShiftBoard();
     }
 
     public IEnumerator ClearAllMatches()
@@ -218,41 +203,37 @@ public class BoardManager : MonoBehaviour
                 grid[x, z].GetComponent<Tile>().ClearMatch();
             }
         }
-        yield return new WaitForSeconds(sequenceDelay);
+        yield return new WaitForSeconds(matchDelay);
     }
 
-    private void AnimateColumn(int x)
+    private IEnumerator AnimateColumn(int x, float time)
     {
+        yield return new WaitForSeconds(time);
         List<GameObject> chain = FindChain(x, false);
         int lowestTile = LowestGridPos(x, chain);
-        int nextAvailablePos = NextAvailableTilePos(x, lowestTile);
+        int nextAvailablePos = NextAvailableGridPos(x, lowestTile);
         if (lowestTile == nextAvailablePos || chain.Count == 0)
         {
             StartCoroutine(IntroduceNewTile(FindChain(x, true).Count, x));
-            return;
+            yield break;
         }
 
         chain.Reverse();
         float distance = lowestTile - nextAvailablePos;
-        float time = distance / shiftSpeed;
+        float travelTime = distance / shiftSpeed;
 
         for (int z = 0; z < chain.Count; z++)
         {
             int nextPos = nextAvailablePos + z;
-            LeanTween.moveZ(chain[z], grid[x, nextPos].transform.position.z, time).setEase(shitAnimCurve);
+            LeanTween.moveZ(chain[z], grid[x, nextPos].transform.position.z, travelTime).setEase(shitAnimCurve);
             SwapTile(x, GridPosFromWorldPos(chain[z].transform.position).z, nextPos);
         }
-        StartCoroutine(AnimateColumnDelay(x, time));
-    }
-
-    private IEnumerator AnimateColumnDelay(int x, float time)
-    {
-        yield return new WaitForSeconds(time);
-        AnimateColumn(x);
+        StartCoroutine(AnimateColumn(x, travelTime));
     }
 
     void SwapTile(int x, int currentPos, int newPos)
     {
+        Debug.Log(currentPos + "-" + newPos);
         Tile currentTile = grid[x, currentPos].GetComponent<Tile>();
         Tile nextTile = grid[x, newPos].GetComponent<Tile>();
 
@@ -270,15 +251,14 @@ public class BoardManager : MonoBehaviour
     private IEnumerator IntroduceNewTile(int amount, int x)
     {
         WaitForSeconds wait = new WaitForSeconds(introduceNewTileTime);
-        Debug.Log("introducing tile");
         for (int z = 1; z <= amount; z++)
         {
-            int _newZPos = (zSize - 1) - amount + z;
-            if (_newZPos > zSize || _newZPos < 0)
+            int newPos = (zSize - 1) - amount + z;
+            if (newPos > zSize || newPos < 0)
             {
                 continue;
             }
-            GameObject gridTile = grid[x, _newZPos];
+            GameObject gridTile = grid[x, newPos];
             GameObject platform = gridTile.GetComponent<Tile>().platform;
             GameObject allowedTile = characters[Random.Range(0, characters.Count)];
             platform.GetComponent<MeshRenderer>().sharedMaterial = allowedTile.GetComponent<MeshRenderer>().sharedMaterial;
@@ -296,17 +276,17 @@ public class BoardManager : MonoBehaviour
         }
         totalTilesRemoved = totalTilesRemoved + amount;
         columnAnimCounter++;
-
     }
 
     void Update()
     {
         if (columnAnimCounter == xSize && tileCompletedCount == totalTilesRemoved)
         {
-            columnAnimCounter = 0;
-            totalTilesRemoved = 0;
-            tileCompletedCount = 0;
-            StartCoroutine(ShiftBoardDelay());
+            if (totalTilesRemoved == 0)
+            {
+                return;
+            }
+            StartCoroutine(ShiftBoard());
         }
     }
 }
